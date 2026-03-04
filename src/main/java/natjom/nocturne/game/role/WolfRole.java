@@ -48,7 +48,9 @@ public class WolfRole extends Role {
                 Role seenRole = session.getBoard().getCenterCard(index);
                 if (seenRole != null) {
                     player.sendSystemMessage(Component.literal("§dTu as regardé la carte du centre n°" + (index + 1) + "."));
-                    player.sendSystemMessage(Component.literal("§dC'est un.e : §l" + seenRole.getDisplayName().getString()));
+                    player.sendSystemMessage(Component.literal("§dC'est un(e) : §l" + seenRole.getDisplayName().getString()));
+
+                    session.addHistory("Le Loup (" + player.getPlainTextName() + ") a regardé le Centre " + (index + 1) + " (" + seenRole.getDisplayName().getString() + ").");
                 }
             });
 
