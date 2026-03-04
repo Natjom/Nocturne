@@ -180,7 +180,8 @@ public class GameSession {
         List<Role> deck = new ArrayList<>();
 
         deck.add(NocturneRegistries.LOUP_GAROU.get());
-        int needed = this.players.size() + 3 - 1;
+        deck.add(NocturneRegistries.VOLEUR.get());
+        int needed = this.players.size() + 3 - 2;
         for (int i = 0; i < needed; i++) {
             deck.add(NocturneRegistries.VILLAGEOIS.get());
         }
@@ -237,8 +238,19 @@ public class GameSession {
     }
 
     public void displayHistory() {
+        this.addHistory("§e--- Rôles Finaux ---");
         for (net.minecraft.server.level.ServerPlayer sp : this.serverPlayers) {
-            sp.sendSystemMessage(net.minecraft.network.chat.Component.literal("§8=== [ Résumé de la Nuit ] ==="));
+            natjom.nocturne.game.role.Role finalRole = this.board.getCurrentRole(sp.getUUID());
+            this.addHistory(sp.getPlainTextName() + " termine en tant que : " + finalRole.getDisplayName().getString());
+        }
+        for (int i = 0; i < 3; i++) {
+            natjom.nocturne.game.role.Role centerRole = this.board.getCenterCard(i);
+            this.addHistory("Centre " + (i + 1) + " : " + centerRole.getDisplayName().getString());
+        }
+        this.addHistory("§e-----------------------------");
+
+        for (net.minecraft.server.level.ServerPlayer sp : this.serverPlayers) {
+            sp.sendSystemMessage(net.minecraft.network.chat.Component.literal("§8=== [ Résumé de la Partie ] ==="));
             for (String event : this.gameHistory) {
                 sp.sendSystemMessage(net.minecraft.network.chat.Component.literal("§7- " + event));
             }

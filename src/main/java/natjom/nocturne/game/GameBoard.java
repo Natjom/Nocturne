@@ -47,4 +47,12 @@ public class GameBoard {
         return null;
     }
 
+    public void swapPlayerRoles(java.util.UUID player1, java.util.UUID player2) {
+        natjom.nocturne.game.role.Role role1 = this.getCurrentRole(player1);
+        natjom.nocturne.game.role.Role role2 = this.getCurrentRole(player2);
+
+        this.currentRoles.put(player1, role2);
+        this.currentRoles.put(player2, role1);
+    }
+
 }
