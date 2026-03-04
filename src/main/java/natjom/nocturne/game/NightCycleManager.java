@@ -85,4 +85,10 @@ public class NightCycleManager {
             sp.sendOverlayMessage(msg);
         }
     }
+
+    public void stop() {
+        if (this.nightBossBar != null) {
+            this.nightBossBar.removeAllPlayers();
+        }
+    }
 }

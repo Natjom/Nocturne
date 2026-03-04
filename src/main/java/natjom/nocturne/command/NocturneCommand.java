@@ -86,6 +86,20 @@ public class NocturneCommand {
                             return 1;
                         })
                 )
+                .then(Commands.literal("skip")
+                        .executes(context -> {
+                            CommandSourceStack source = context.getSource();
+
+                            if (currentSession == null || currentSession.getState() != natjom.nocturne.game.GameState.DAY) {
+                                source.sendSystemMessage(Component.literal("§cVous tne pouvez passer le temps que pendant le jour."));
+                                return 0;
+                            }
+
+                            currentSession.registerSkip(source.getPlayerOrException());
+
+                            return 1;
+                        })
+                )
         );
     }
 }
