@@ -47,6 +47,9 @@ neoForge {
         server {
             server()
             programArgument '--nogui'
+            jvmArgument '-Xmx2G'
+            jvmArgument '-Xms2G'
+            systemProperty 'java.net.preferIPv4Stack', 'true'
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
 
