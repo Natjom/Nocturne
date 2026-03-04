@@ -22,26 +22,39 @@ neoForge {
     version = project.neo_version
 
     runs {
-        client {
+        client_1 {
             client()
-
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+            programArgument '--username'
+            programArgument 'Natjom'
         }
+
+        client_2 {
+            client()
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+            programArgument '--username'
+            programArgument 'AchilleT21'
+        }
+
+        client_3 {
+            client()
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+            programArgument '--username'
+            programArgument 'Insane_Tomax'
+        }
+
 
         server {
             server()
             programArgument '--nogui'
-            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
-        }
-
-        gameTestServer {
-            type = "gameTestServer"
+            jvmArgument '-Xmx2G'
+            jvmArgument '-Xms2G'
+            systemProperty 'java.net.preferIPv4Stack', 'true'
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
 
         data {
             clientData()
-
             programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
         }
 

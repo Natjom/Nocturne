@@ -10,17 +10,13 @@ public abstract class Role {
 
     public abstract int getNightOrder();
 
+    // public abstract String getSkinTexture();
+
     public abstract String getSkinTexture();
 
-    public boolean hasNightAction() {
-        return false;
-    }
+    public boolean hasNightAction() { return false; }
 
-    public void onWakeUp(ServerPlayer player, GameSession session) {
-        // TODO:
-    }
+    public int getActionDuration() { return 140; }
 
-    public void onSleep(ServerPlayer player, GameSession session) {
-        // TODO:
-    }
+    public void onWakeUp(ServerPlayer player, GameSession session) { }
 }

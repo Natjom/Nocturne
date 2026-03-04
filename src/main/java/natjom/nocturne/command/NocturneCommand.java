@@ -43,6 +43,63 @@ public class NocturneCommand {
                             return 1;
                         })
                 )
+                .then(Commands.literal("stop")
+                        .executes(context -> {
+                            CommandSourceStack source = context.getSource();
+
+                            if (currentSession == null || currentSession.getState() == natjom.nocturne.game.GameState.END) {
+                                source.sendSystemMessage(Component.literal("§cAucune partie en cours à arrêter."));
+                                return 0;
+                            }
+
+                            currentSession.stop();
+                            currentSession = null;
+
+                            source.getServer().getPlayerList().broadcastSystemMessage(
+                                    Component.literal("§cLa partie de Nocturne a été annulée !"), false
+                            );
+
+                            return 1;
+                        })
+                )
+                .then(Commands.literal("pause")
+                        .executes(context -> {
+                            CommandSourceStack source = context.getSource();
+
+                            if (currentSession == null || currentSession.getState() == natjom.nocturne.game.GameState.END) {
+                                source.sendSystemMessage(Component.literal("§cAucune partie en cours."));
+                                return 0;
+                            }
+
+                            currentSession.togglePause();
+
+                            if (currentSession.isPaused()) {
+                                source.getServer().getPlayerList().broadcastSystemMessage(
+                                        Component.literal("§eLa partie est en PAUSE !"), false
+                                );
+                            } else {
+                                source.getServer().getPlayerList().broadcastSystemMessage(
+                                        Component.literal("§aLa partie REPREND !"), false
+                                );
+                            }
+
+                            return 1;
+                        })
+                )
+                .then(Commands.literal("skip")
+                        .executes(context -> {
+                            CommandSourceStack source = context.getSource();
+
+                            if (currentSession == null || currentSession.getState() != natjom.nocturne.game.GameState.DAY) {
+                                source.sendSystemMessage(Component.literal("§cVous tne pouvez passer le temps que pendant le jour."));
+                                return 0;
+                            }
+
+                            currentSession.registerSkip(source.getPlayerOrException());
+
+                            return 1;
+                        })
+                )
         );
     }
 }

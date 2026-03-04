@@ -1,0 +1,15 @@
+Comment aider sur Nocturne :
+
+1. Architecture :
+Le projet repose sur la classe abstraite 'Role'. Si vous voulez ajouter un nouveau role, il doit heriter de cette classe et implementer les methodes mères.
+
+2. Workflow :
+- Forkez le projet.
+- Creez une branche pour votre ajout.
+- Faites votre Pull Request.
+
+3. Code Style :
+Gardez le code propre et commentez uniquement si c'est indispensable. Nous utilisons NeoForge pour la 26.1.
+
+4. Licence :
+En contribuant, vous acceptez que votre code soit egalement sous licence GPLv3.
