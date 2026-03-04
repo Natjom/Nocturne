@@ -25,6 +25,9 @@ public class GameBoard {
             initialRoles.put(player, assignedRole);
             currentRoles.put(player, assignedRole);
         }
+
+        initialRoles.clear();
+        initialRoles.putAll(currentRoles);
     }
 
     public List<Role> getAllRolesInGame() {

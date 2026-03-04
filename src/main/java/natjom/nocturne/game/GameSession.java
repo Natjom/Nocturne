@@ -186,6 +186,8 @@ public class GameSession {
             deck.add(NocturneRegistries.VILLAGEOIS.get());
         }
 
+        this.board.setup(this.players, deck);
+
         this.addHistory("§e--- Distribution Initiale ---");
         for (net.minecraft.server.level.ServerPlayer sp : this.serverPlayers) {
             natjom.nocturne.game.role.Role initialRole = this.board.getInitialRole(sp.getUUID());
@@ -197,7 +199,6 @@ public class GameSession {
         }
         this.addHistory("§e-----------------------------");
 
-        this.board.setup(this.players, deck);
         this.currentState = GameState.NIGHT;
 
         for (ServerPlayer sp : serverPlayers) {
@@ -211,8 +212,6 @@ public class GameSession {
         }
 
         this.nightCycle = new NightCycleManager(this);
-        this.currentState = GameState.NIGHT;
-
     }
 
     public void stop() {
