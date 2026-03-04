@@ -4,6 +4,8 @@ import natjom.nocturne.registry.NocturneRegistries;
 import natjom.nocturne.game.role.Role;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.ServerBossEvent;
+import net.minecraft.world.BossEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +19,9 @@ public class GameSession {
     private GameState currentState;
     private NightCycleManager nightCycle;
     private boolean isPaused = false;
+    private int dayTimer;
+    private final int maxDayTime = 3600;
+    private ServerBossEvent dayBossBar;
 
     public GameSession(List<ServerPlayer> serverPlayers) {
         this.serverPlayers = serverPlayers;
@@ -44,13 +49,27 @@ public class GameSession {
 
     public void togglePause() { this.isPaused = !this.isPaused; }
 
-    public void stop() { this.currentState = GameState.END; }
-
+    public void stop() {
+        this.currentState = GameState.END;
+        if (this.dayBossBar != null) {
+            this.dayBossBar.removeAllPlayers();
+        }
+    }
 
     public void endNight() {
         this.currentState = GameState.DAY;
-        for (ServerPlayer sp : this.serverPlayers) {
+        this.dayTimer = this.maxDayTime;
+
+        this.dayBossBar = new ServerBossEvent(
+                java.util.UUID.randomUUID(),
+                net.minecraft.network.chat.Component.literal("§eTemps de débat"),
+                BossEvent.BossBarColor.YELLOW,
+                BossEvent.BossBarOverlay.PROGRESS
+        );
+
+        for (net.minecraft.server.level.ServerPlayer sp : this.serverPlayers) {
             sp.sendSystemMessage(net.minecraft.network.chat.Component.literal("§6Le jour se lève sur le village ! Il est temps de débattre..."));
+            this.dayBossBar.addPlayer(sp);
         }
     }
 
@@ -61,8 +80,29 @@ public class GameSession {
 
         if (this.currentState == GameState.NIGHT && nightCycle != null) {
             nightCycle.tick();
+        } else if (this.currentState == GameState.DAY) {
+            if (this.dayTimer > 0) {
+                this.dayTimer--;
+                this.dayBossBar.setProgress((float) this.dayTimer / this.maxDayTime);
+            } else {
+                this.endDay();
+            }
         }
     }
+
+    public void endDay() {
+        this.currentState = GameState.END;
+
+        if (this.dayBossBar != null) {
+            this.dayBossBar.removeAllPlayers();
+        }
+
+        for (net.minecraft.server.level.ServerPlayer sp : this.serverPlayers) {
+            sp.sendSystemMessage(net.minecraft.network.chat.Component.literal("§cLe temps est écoulé ! C'est l'heure du vote..."));
+        }
+    }
+
+
 
     public void start() {
         List<Role> deck = new ArrayList<>();
