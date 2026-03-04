@@ -181,7 +181,7 @@ public class GameSession {
 
         deck.add(NocturneRegistries.LOUP_GAROU.get());
         deck.add(NocturneRegistries.VOLEUR.get());
-        int needed = this.players.size() + 3 - 2;
+        int needed = this.players.size() + 1;
         for (int i = 0; i < needed; i++) {
             deck.add(NocturneRegistries.VILLAGEOIS.get());
         }

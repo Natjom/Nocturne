@@ -19,7 +19,7 @@ public class NocturneRegistries {
     public static final DeferredRegister<Role> ROLES =
             DeferredRegister.create(ROLE_REGISTRY_KEY, Nocturne.MODID);
 
-    // public static final Registry<Role> REGISTRY = ROLES.makeRegistry(builder -> { builder.defaultKey(Identifier.fromNamespaceAndPath(Nocturne.MODID, "villageois")); });
+    public static final Registry<Role> REGISTRY = ROLES.makeRegistry(builder -> { builder.defaultKey(Identifier.fromNamespaceAndPath(Nocturne.MODID, "villageois")); });
 
     public static final DeferredHolder<Role, Role> VILLAGEOIS =
             ROLES.register("villageois", VillagerRole::new);
