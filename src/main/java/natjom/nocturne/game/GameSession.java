@@ -15,6 +15,7 @@ public class GameSession {
     private final PlayerCircle circle;
     private final GameBoard board;
     private GameState currentState;
+    private NightCycleManager nightCycle;
 
     public GameSession(List<ServerPlayer> serverPlayers) {
         this.serverPlayers = serverPlayers;
@@ -39,8 +40,21 @@ public class GameSession {
         for (ServerPlayer sp : serverPlayers) {
             Role role = this.board.getCurrentRole(sp.getUUID());
 
-            sp.sendOverlayMessage(Component.literal("§bTon rôle est : §l" + role.getDisplayName().getString()));
+            sp.sendSystemMessage(Component.literal("§8================================="));
+            sp.sendSystemMessage(Component.literal("§bLa partie commence !"));
+            sp.sendSystemMessage(Component.literal("§eTon rôle est : §l" + role.getDisplayName().getString()));
+            sp.sendSystemMessage(Component.literal("§8================================="));
             sp.sendSystemMessage(Component.literal("§7La nuit tombe sur le village..."));
+        }
+
+        this.nightCycle = new NightCycleManager(this);
+        this.currentState = GameState.NIGHT;
+
+    }
+
+    public void tick() {
+        if (this.currentState == GameState.NIGHT && nightCycle != null) {
+            nightCycle.tick();
         }
     }
 
@@ -54,5 +68,14 @@ public class GameSession {
 
     public GameBoard getBoard() {
         return board;
+    }
+
+    public List<ServerPlayer> getServerPlayers() { return this.serverPlayers; }
+
+    public void endNight() {
+        this.currentState = GameState.DAY;
+        for (ServerPlayer sp : this.serverPlayers) {
+            sp.sendSystemMessage(net.minecraft.network.chat.Component.literal("§6Le jour se lève sur le village ! Il est temps de débattre..."));
+        }
     }
 }

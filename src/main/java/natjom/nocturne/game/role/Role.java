@@ -12,9 +12,9 @@ public abstract class Role {
 
     public abstract String getSkinTexture();
 
-    public boolean hasNightAction() {
-        return false;
-    }
+    public boolean hasNightAction() { return false; }
+
+    public int getActionDuration() { return 140; }
 
     public void onWakeUp(ServerPlayer player, GameSession session) {
         // TODO:

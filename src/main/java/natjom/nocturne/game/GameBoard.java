@@ -27,6 +27,13 @@ public class GameBoard {
         }
     }
 
+    public List<Role> getAllRolesInGame() {
+        List<Role> allRoles = new ArrayList<>();
+        allRoles.addAll(initialRoles.values());
+        allRoles.addAll(centerCards);
+        return allRoles;
+    }
+
     public Role getCurrentRole(UUID player) {
         return currentRoles.get(player);
     }
@@ -34,4 +41,8 @@ public class GameBoard {
     public List<Role> getCenterCards() {
         return centerCards;
     }
+
+    public Role getInitialRole(UUID player) { return initialRoles.get(player); }
+
+
 }

@@ -28,7 +28,6 @@ public class WolfRole extends Role {
 
     @Override
     public void onWakeUp(ServerPlayer player, GameSession session) {
-        player.sendOverlayMessage(Component.literal("§cTu te réveilles. Tu es un Loup-Garou !"));
-        // TODO
+        player.sendSystemMessage(Component.literal("§c[Nuit] Tu te réveilles. Tu es un Loup-Garou !"));
     }
 }
