@@ -12,6 +12,8 @@ public abstract class Role {
 
     // public abstract String getSkinTexture();
 
+    public abstract String getSkinTexture();
+
     public boolean hasNightAction() { return false; }
 
     public int getActionDuration() { return 140; }

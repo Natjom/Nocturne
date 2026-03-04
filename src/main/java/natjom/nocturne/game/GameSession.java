@@ -14,7 +14,7 @@ import java.util.UUID;
 public class GameSession {
     private final List<ServerPlayer> serverPlayers;
     private final List<UUID> players;
-    private final PlayerCircle circle;
+    // private final PlayerCircle circle;
     private final GameBoard board;
     private GameState currentState;
     private NightCycleManager nightCycle;
@@ -28,7 +28,7 @@ public class GameSession {
     public GameSession(List<ServerPlayer> serverPlayers) {
         this.serverPlayers = serverPlayers;
         this.players = serverPlayers.stream().map(ServerPlayer::getUUID).toList();
-        this.circle = new PlayerCircle(this.players);
+        // this.circle = new PlayerCircle(this.players);
         this.board = new GameBoard();
         this.currentState = GameState.IDLE;
     }

@@ -22,9 +22,7 @@ public class WolfRole extends Role {
     }
 
     @Override
-    public String getSkinTexture() {
-        return "";
-    }
+    public String getSkinTexture() { return ""; }
 
     @Override
     public boolean hasNightAction() {
