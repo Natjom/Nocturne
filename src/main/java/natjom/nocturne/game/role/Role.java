@@ -16,11 +16,5 @@ public abstract class Role {
 
     public int getActionDuration() { return 140; }
 
-    public void onWakeUp(ServerPlayer player, GameSession session) {
-        // TODO:
-    }
-
-    public void onSleep(ServerPlayer player, GameSession session) {
-        // TODO:
-    }
+    public void onWakeUp(ServerPlayer player, GameSession session) { }
 }

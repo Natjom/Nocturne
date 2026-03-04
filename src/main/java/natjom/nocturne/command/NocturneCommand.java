@@ -2,6 +2,7 @@ package natjom.nocturne.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import natjom.nocturne.game.GameSession;
+import natjom.nocturne.game.role.Role;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
@@ -40,6 +41,49 @@ public class NocturneCommand {
                             currentSession.start();
 
                             source.sendSystemMessage(Component.literal("§aCréation de la partie réussie !"));
+                            return 1;
+                        })
+                )
+                .then(Commands.literal("stop")
+                        .executes(context -> {
+                            CommandSourceStack source = context.getSource();
+
+                            if (currentSession == null || currentSession.getState() == natjom.nocturne.game.GameState.END) {
+                                source.sendSystemMessage(Component.literal("§cAucune partie en cours à arrêter."));
+                                return 0;
+                            }
+
+                            currentSession.stop();
+                            currentSession = null;
+
+                            source.getServer().getPlayerList().broadcastSystemMessage(
+                                    Component.literal("§cLa partie de Nocturne a été annulée !"), false
+                            );
+
+                            return 1;
+                        })
+                )
+                .then(Commands.literal("pause")
+                        .executes(context -> {
+                            CommandSourceStack source = context.getSource();
+
+                            if (currentSession == null || currentSession.getState() == natjom.nocturne.game.GameState.END) {
+                                source.sendSystemMessage(Component.literal("§cAucune partie en cours."));
+                                return 0;
+                            }
+
+                            currentSession.togglePause();
+
+                            if (currentSession.isPaused()) {
+                                source.getServer().getPlayerList().broadcastSystemMessage(
+                                        Component.literal("§eLa partie est en PAUSE !"), false
+                                );
+                            } else {
+                                source.getServer().getPlayerList().broadcastSystemMessage(
+                                        Component.literal("§aLa partie REPREND !"), false
+                                );
+                            }
+
                             return 1;
                         })
                 )

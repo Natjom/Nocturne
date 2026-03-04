@@ -16,6 +16,7 @@ public class GameSession {
     private final GameBoard board;
     private GameState currentState;
     private NightCycleManager nightCycle;
+    private boolean isPaused = false;
 
     public GameSession(List<ServerPlayer> serverPlayers) {
         this.serverPlayers = serverPlayers;
@@ -23,6 +24,44 @@ public class GameSession {
         this.circle = new PlayerCircle(this.players);
         this.board = new GameBoard();
         this.currentState = GameState.IDLE;
+    }
+
+    public PlayerCircle getCircle() {
+        return circle;
+    }
+
+    public GameState getState() {
+        return currentState;
+    }
+
+    public GameBoard getBoard() {
+        return board;
+    }
+
+    public List<ServerPlayer> getServerPlayers() { return this.serverPlayers; }
+
+    public boolean isPaused() { return this.isPaused; }
+
+    public void togglePause() { this.isPaused = !this.isPaused; }
+
+    public void stop() { this.currentState = GameState.END; }
+
+
+    public void endNight() {
+        this.currentState = GameState.DAY;
+        for (ServerPlayer sp : this.serverPlayers) {
+            sp.sendSystemMessage(net.minecraft.network.chat.Component.literal("§6Le jour se lève sur le village ! Il est temps de débattre..."));
+        }
+    }
+
+    public void tick() {
+        if (this.isPaused) {
+            return;
+        }
+
+        if (this.currentState == GameState.NIGHT && nightCycle != null) {
+            nightCycle.tick();
+        }
     }
 
     public void start() {
@@ -50,32 +89,5 @@ public class GameSession {
         this.nightCycle = new NightCycleManager(this);
         this.currentState = GameState.NIGHT;
 
-    }
-
-    public void tick() {
-        if (this.currentState == GameState.NIGHT && nightCycle != null) {
-            nightCycle.tick();
-        }
-    }
-
-    public PlayerCircle getCircle() {
-        return circle;
-    }
-
-    public GameState getState() {
-        return currentState;
-    }
-
-    public GameBoard getBoard() {
-        return board;
-    }
-
-    public List<ServerPlayer> getServerPlayers() { return this.serverPlayers; }
-
-    public void endNight() {
-        this.currentState = GameState.DAY;
-        for (ServerPlayer sp : this.serverPlayers) {
-            sp.sendSystemMessage(net.minecraft.network.chat.Component.literal("§6Le jour se lève sur le village ! Il est temps de débattre..."));
-        }
     }
 }

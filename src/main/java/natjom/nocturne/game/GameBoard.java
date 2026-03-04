@@ -17,11 +17,11 @@ public class GameBoard {
         Collections.shuffle(deck);
 
         for (int i = 0; i < 3; i++) {
-            centerCards.add(deck.remove(0));
+            centerCards.add(deck.removeFirst());
         }
 
         for (UUID player : players) {
-            Role assignedRole = deck.remove(0);
+            Role assignedRole = deck.removeFirst();
             initialRoles.put(player, assignedRole);
             currentRoles.put(player, assignedRole);
         }
@@ -38,11 +38,13 @@ public class GameBoard {
         return currentRoles.get(player);
     }
 
-    public List<Role> getCenterCards() {
-        return centerCards;
-    }
-
     public Role getInitialRole(UUID player) { return initialRoles.get(player); }
 
+    public Role getCenterCard(int index) {
+        if (index >= 0 && index < centerCards.size()) {
+            return centerCards.get(index);
+        }
+        return null;
+    }
 
 }
