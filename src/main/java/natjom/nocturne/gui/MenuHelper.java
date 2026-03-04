@@ -58,7 +58,7 @@ public class MenuHelper {
         }
 
         player.openMenu(new SimpleMenuProvider(
-                (id, inv, p) -> new ChoiceMenu(id, inv, container),
+                (id, inv, _) -> new ChoiceMenu(id, inv, container),
                 Component.literal(title)
         ));
     }

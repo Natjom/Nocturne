@@ -2,7 +2,6 @@ package natjom.nocturne.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import natjom.nocturne.game.GameSession;
-import natjom.nocturne.game.role.Role;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;

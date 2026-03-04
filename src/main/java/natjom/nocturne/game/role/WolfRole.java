@@ -3,10 +3,7 @@ package natjom.nocturne.game.role;
 import natjom.nocturne.game.GameSession;
 import natjom.nocturne.gui.MenuHelper;
 import natjom.nocturne.util.MenuIcons;
-import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.Style;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 
