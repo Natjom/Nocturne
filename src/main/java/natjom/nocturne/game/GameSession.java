@@ -33,9 +33,7 @@ public class GameSession {
         this.currentState = GameState.IDLE;
     }
 
-    public PlayerCircle getCircle() {
-        return circle;
-    }
+    // public PlayerCircle getCircle() { return circle; }
 
     public GameState getState() {
         return currentState;
