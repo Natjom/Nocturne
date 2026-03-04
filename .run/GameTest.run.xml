@@ -1,0 +1,9 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="GameTest" type="CompoundRunConfigurationType">
+    <toRun name="Client_1" type="Application" />
+    <toRun name="Client_2" type="Application" />
+    <toRun name="Client_3" type="Application" />
+    <toRun name="Server" type="Application" />
+    <method v="2" />
+  </configuration>
+</component>
