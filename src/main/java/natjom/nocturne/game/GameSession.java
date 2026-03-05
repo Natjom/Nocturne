@@ -167,11 +167,23 @@ public class GameSession {
             }
         }
 
+        java.util.List<java.util.UUID> extraEliminations = new java.util.ArrayList<>();
+        for (java.util.UUID deadId : eliminated) {
+            natjom.nocturne.game.role.Role deadRole = this.board.getCurrentRole(deadId);
+            if (deadRole instanceof natjom.nocturne.game.role.ChasseurRole) {
+                java.util.UUID hunterTarget = this.votes.get(deadId);
+                if (hunterTarget != null && !eliminated.contains(hunterTarget) && !extraEliminations.contains(hunterTarget)) {
+                    extraEliminations.add(hunterTarget);
+                }
+            }
+        }
+        eliminated.addAll(extraEliminations);
+
         for (net.minecraft.server.level.ServerPlayer sp : this.serverPlayers) {
             for (java.util.UUID deadId : eliminated) {
                 net.minecraft.server.level.ServerPlayer deadPlayer = sp.level().getServer().getPlayerList().getPlayer(deadId);
                 if (deadPlayer != null) {
-                    sp.sendSystemMessage(net.minecraft.network.chat.Component.literal("§4" + deadPlayer.getPlainTextName() + " a été éliminé avec " + maxVotes + " votes !"));
+                    sp.sendSystemMessage(net.minecraft.network.chat.Component.literal("§4" + deadPlayer.getPlainTextName() + " a été éliminé !"));
                 }
             }
         }
