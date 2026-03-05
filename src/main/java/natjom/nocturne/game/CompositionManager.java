@@ -18,13 +18,8 @@ public class CompositionManager {
 
     public static void initDefault() {
         if (COMPOSITION.isEmpty()) {
-            NocturneRegistries.ROLES.getEntries().forEach(entry -> {
-                Role role = entry.get();
-                if (role instanceof LoupRole || role instanceof VillageoisRole) {
-                    COMPOSITION.put(role, 1);
-                } else {
-                    COMPOSITION.put(role, 0);
-                }
+            natjom.nocturne.registry.NocturneRegistries.ROLES.getEntries().forEach(entry -> {
+                COMPOSITION.put(entry.get(), 0);
             });
         }
     }

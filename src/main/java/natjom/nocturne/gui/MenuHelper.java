@@ -149,7 +149,7 @@ public class MenuHelper {
         natjom.nocturne.game.CompoSet[] sets = natjom.nocturne.game.CompoSet.values();
 
         for (natjom.nocturne.game.CompoSet set : sets) {
-            ItemStack icon = new ItemStack(net.minecraft.world.item.Items.WRITTEN_BOOK);
+            ItemStack icon = new ItemStack(net.minecraft.world.item.Items.BOOK);
             boolean isActive = (natjom.nocturne.game.CompositionManager.activeCompoSet == set);
             int count = isActive ? natjom.nocturne.game.CompositionManager.activeCompoPlayerCount : set.getMinPlayers();
 
