@@ -25,6 +25,7 @@ public class NocturneCommand {
                 .then(Commands.literal("start")
                         .executes(context -> {
                             CommandSourceStack source = context.getSource();
+                            ServerPlayer master = source.getPlayerOrException();
                             List<ServerPlayer> players = source.getServer().getPlayerList().getPlayers();
 
                             if (players.isEmpty()) {
@@ -37,10 +38,10 @@ public class NocturneCommand {
                                 return 0;
                             }
 
-                            currentSession = new GameSession(players);
+                            currentSession = new GameSession(players, master.getUUID());
                             currentSession.start();
 
-                            source.sendSystemMessage(Component.literal("§aCréation de la partie réussie !"));
+                            source.sendSystemMessage(Component.literal("§aCréation de la partie réussie ! Vous êtes le Maître du Jeu."));
                             return 1;
                         })
                 )
@@ -92,7 +93,7 @@ public class NocturneCommand {
                             CommandSourceStack source = context.getSource();
 
                             if (currentSession == null || currentSession.getState() != natjom.nocturne.game.GameState.DAY) {
-                                source.sendSystemMessage(Component.literal("§cVous tne pouvez passer le temps que pendant le jour."));
+                                source.sendSystemMessage(Component.literal("§cVous ne pouvez passer le temps que pendant le jour."));
                                 return 0;
                             }
 
@@ -105,6 +106,24 @@ public class NocturneCommand {
                         .executes(context -> {
                             ServerPlayer player = context.getSource().getPlayerOrException();
                             MenuHelper.openCompoMenu(player);
+                            return 1;
+                        })
+                )
+                .then(Commands.literal("_revealRole")
+                        .executes(context -> {
+                            ServerPlayer player = context.getSource().getPlayerOrException();
+                            if (currentSession != null) {
+                                currentSession.revealPlayerRole(player);
+                            }
+                            return 1;
+                        })
+                )
+                .then(Commands.literal("_endGame")
+                        .executes(context -> {
+                            ServerPlayer player = context.getSource().getPlayerOrException();
+                            if (currentSession != null && player.getUUID().equals(currentSession.getGameMaster())) {
+                                currentSession.revealWinnersAndHistory();
+                            }
                             return 1;
                         })
                 )

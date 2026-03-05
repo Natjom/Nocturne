@@ -15,7 +15,6 @@ import java.util.*;
 public class GameSession {
     private final List<ServerPlayer> serverPlayers;
     private final List<UUID> players;
-    // private final PlayerCircle circle;
     private final GameBoard board;
     private GameState currentState;
     private NightCycleManager nightCycle;
@@ -23,32 +22,27 @@ public class GameSession {
     private int dayTimer;
     private final int maxDayTime = 3600;
     private ServerBossEvent dayBossBar;
-    private final java.util.Map<java.util.UUID, java.util.UUID> votes = new java.util.HashMap<>();
-    private final java.util.Set<java.util.UUID> skipVotes = new java.util.HashSet<>();
-    private final java.util.List<String> gameHistory = new java.util.ArrayList<>();
+    private final Map<UUID, UUID> votes = new HashMap<>();
+    private final Set<UUID> skipVotes = new HashSet<>();
+    private final List<String> gameHistory = new ArrayList<>();
+    private final UUID gameMaster;
+    private final List<UUID> eliminatedPlayers = new ArrayList<>();
+    private boolean isWaitingForReveal = false;
+    private final Set<UUID> revealedPlayers = new HashSet<>();
 
-    public GameSession(List<ServerPlayer> serverPlayers) {
+    public GameSession(List<ServerPlayer> serverPlayers, UUID gameMaster) {
         this.serverPlayers = serverPlayers;
         this.players = serverPlayers.stream().map(ServerPlayer::getUUID).toList();
-        // this.circle = new PlayerCircle(this.players);
         this.board = new GameBoard();
         this.currentState = GameState.IDLE;
+        this.gameMaster = gameMaster;
     }
 
-    // public PlayerCircle getCircle() { return circle; }
-
-    public GameState getState() {
-        return currentState;
-    }
-
-    public GameBoard getBoard() {
-        return board;
-    }
-
+    public GameState getState() { return currentState; }
+    public GameBoard getBoard() { return board; }
     public List<ServerPlayer> getServerPlayers() { return this.serverPlayers; }
-
+    public UUID getGameMaster() { return this.gameMaster; }
     public boolean isPaused() { return this.isPaused; }
-
     public void togglePause() { this.isPaused = !this.isPaused; }
 
     public void registerSkip(ServerPlayer player) {
@@ -73,7 +67,7 @@ public class GameSession {
         this.dayTimer = this.maxDayTime;
 
         this.dayBossBar = new ServerBossEvent(
-                java.util.UUID.randomUUID(),
+                UUID.randomUUID(),
                 Component.literal("§eTemps de débat"),
                 BossEvent.BossBarColor.YELLOW,
                 BossEvent.BossBarOverlay.PROGRESS
@@ -110,7 +104,6 @@ public class GameSession {
             this.dayBossBar.removeAllPlayers();
         }
 
-
         for (ServerPlayer sp : this.serverPlayers) {
             sp.sendSystemMessage(Component.literal("§cLe temps est écoulé ! C'est l'heure du vote..."));
             sp.playSound(SoundEvents.BELL_BLOCK, 1.0F, 1.0F);
@@ -119,7 +112,7 @@ public class GameSession {
     }
 
     private void openVoteMenu(ServerPlayer player) {
-        java.util.List<ItemStack> options = new java.util.ArrayList<>();
+        List<ItemStack> options = new ArrayList<>();
         List<ServerPlayer> validTargets = new ArrayList<>();
 
         for (ServerPlayer target : this.serverPlayers) {
@@ -161,56 +154,96 @@ public class GameSession {
             for (ServerPlayer sp : this.serverPlayers) {
                 sp.sendSystemMessage(Component.literal("§eÉgalité parfaite (1 vote max). Personne n'est éliminé !"));
             }
-            return;
-        }
-
-        List<UUID> eliminated = new ArrayList<>();
-        for (Map.Entry<UUID, Integer> entry : voteCounts.entrySet()) {
-            if (entry.getValue() == maxVotes) {
-                eliminated.add(entry.getKey());
-            }
-        }
-
-        List<UUID> extraEliminations = new ArrayList<>();
-        for (UUID deadId : eliminated) {
-            Role deadRole = this.board.getCurrentRole(deadId);
-            if (deadRole instanceof ChasseurRole) {
-                java.util.UUID hunterTarget = this.votes.get(deadId);
-                if (hunterTarget != null && !eliminated.contains(hunterTarget) && !extraEliminations.contains(hunterTarget)) {
-                    extraEliminations.add(hunterTarget);
+        } else {
+            List<UUID> eliminated = new ArrayList<>();
+            for (Map.Entry<UUID, Integer> entry : voteCounts.entrySet()) {
+                if (entry.getValue() == maxVotes) {
+                    eliminated.add(entry.getKey());
                 }
             }
-        }
-        eliminated.addAll(extraEliminations);
 
-        for (ServerPlayer sp : this.serverPlayers) {
-            sp.removeEffect(MobEffects.RESISTANCE);
-            sp.removeEffect(MobEffects.SATURATION);
-            sp.removeEffect(MobEffects.WEAKNESS);
+            List<UUID> extraEliminations = new ArrayList<>();
+            for (UUID deadId : eliminated) {
+                Role deadRole = this.board.getCurrentRole(deadId);
+                if (deadRole instanceof ChasseurRole) {
+                    UUID hunterTarget = this.votes.get(deadId);
+                    if (hunterTarget != null && !eliminated.contains(hunterTarget) && !extraEliminations.contains(hunterTarget)) {
+                        extraEliminations.add(hunterTarget);
+                    }
+                }
+            }
+            eliminated.addAll(extraEliminations);
+            this.eliminatedPlayers.addAll(eliminated);
 
-            for (java.util.UUID deadId : eliminated) {
-                net.minecraft.server.level.ServerPlayer deadPlayer = sp.level().getServer().getPlayerList().getPlayer(deadId);
-                if (deadPlayer != null) {
-                    sp.sendSystemMessage(Component.literal("§4" + deadPlayer.getPlainTextName() + " a été éliminé !"));
+            for (ServerPlayer sp : this.serverPlayers) {
+                sp.removeEffect(MobEffects.RESISTANCE);
+                sp.removeEffect(MobEffects.SATURATION);
+                sp.removeEffect(MobEffects.WEAKNESS);
 
-                    if (sp.getUUID().equals(deadId)) {
-                        net.minecraft.server.level.ServerLevel sLevel = (net.minecraft.server.level.ServerLevel) deadPlayer.level();
-                        net.minecraft.world.entity.LightningBolt lightning = net.minecraft.world.entity.EntityType.LIGHTNING_BOLT.create(sLevel, net.minecraft.world.entity.EntitySpawnReason.COMMAND);
+                for (UUID deadId : eliminated) {
+                    ServerPlayer deadPlayer = sp.level().getServer().getPlayerList().getPlayer(deadId);
+                    if (deadPlayer != null) {
+                        sp.sendSystemMessage(Component.literal("§4" + deadPlayer.getPlainTextName() + " a été éliminé !"));
 
-                        if (lightning != null) {
-                            lightning.setPos(deadPlayer.getX(), deadPlayer.getY(), deadPlayer.getZ());
-                            lightning.setVisualOnly(true);
-                            sLevel.addFreshEntity(lightning);
+                        if (sp.getUUID().equals(deadId)) {
+                            net.minecraft.server.level.ServerLevel sLevel = (net.minecraft.server.level.ServerLevel) deadPlayer.level();
+                            net.minecraft.world.entity.LightningBolt lightning = net.minecraft.world.entity.EntityType.LIGHTNING_BOLT.create(sLevel, net.minecraft.world.entity.EntitySpawnReason.COMMAND);
+
+                            if (lightning != null) {
+                                lightning.setPos(deadPlayer.getX(), deadPlayer.getY(), deadPlayer.getZ());
+                                lightning.setVisualOnly(true);
+                                sLevel.addFreshEntity(lightning);
+                            }
                         }
                     }
                 }
             }
         }
 
+        this.isWaitingForReveal = true;
+
+        net.minecraft.network.chat.MutableComponent revealBtn = Component.literal("§a§l[Révéler mon rôle]")
+                .withStyle(style -> style.withClickEvent(new net.minecraft.network.chat.ClickEvent.RunCommand("/nocturne _revealRole"))
+                        .withHoverEvent(new net.minecraft.network.chat.HoverEvent.ShowText(Component.literal("§eClique pour révéler ton rôle final au village !"))));
+
+        net.minecraft.network.chat.MutableComponent endBtn = Component.literal("§6§l[Afficher les gagnants et l'Historique]")
+                .withStyle(style -> style.withClickEvent(new net.minecraft.network.chat.ClickEvent.RunCommand("/nocturne _endGame"))
+                        .withHoverEvent(new net.minecraft.network.chat.HoverEvent.ShowText(Component.literal("§eClique pour terminer la partie !"))));
+
+        for (ServerPlayer sp : this.serverPlayers) {
+            sp.sendSystemMessage(Component.literal(""));
+            sp.sendSystemMessage(revealBtn);
+            if (sp.getUUID().equals(this.gameMaster)) {
+                sp.sendSystemMessage(endBtn);
+            }
+        }
+    }
+
+    public void revealPlayerRole(ServerPlayer player) {
+        if (!this.isWaitingForReveal || this.revealedPlayers.contains(player.getUUID())) {
+            return;
+        }
+
+        this.revealedPlayers.add(player.getUUID());
+        Role finalRole = this.board.getCurrentRole(player.getUUID());
+
+        for (ServerPlayer sp : this.serverPlayers) {
+            sp.sendSystemMessage(Component.literal("§d" + player.getPlainTextName() + " révèle son rôle : §l" + finalRole.getDisplayName().getString()));
+            sp.playSound(SoundEvents.EXPERIENCE_ORB_PICKUP, 1.0F, 1.0F);
+        }
+    }
+
+    public void revealWinnersAndHistory() {
+        if (!this.isWaitingForReveal) {
+            return;
+        }
+
+        this.isWaitingForReveal = false;
         this.addHistory("§e--- Résultats ---");
-        for (net.minecraft.server.level.ServerPlayer sp : this.serverPlayers) {
-            natjom.nocturne.game.role.Role finalRole = this.board.getCurrentRole(sp.getUUID());
-            boolean won = finalRole.didWin(this, sp.getUUID(), eliminated);
+
+        for (ServerPlayer sp : this.serverPlayers) {
+            Role finalRole = this.board.getCurrentRole(sp.getUUID());
+            boolean won = finalRole.didWin(this, sp.getUUID(), this.eliminatedPlayers);
 
             if (won) {
                 sp.sendSystemMessage(Component.literal("§a§lVICTOIRE ! §r§aTu as gagné."));
@@ -225,7 +258,6 @@ public class GameSession {
 
         this.displayHistory();
     }
-
 
     public void start() {
         natjom.nocturne.game.CompositionManager.initDefault();
@@ -270,8 +302,6 @@ public class GameSession {
             sp.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.WEAKNESS, -1, 255, false, false, false));
 
             sp.playSound(net.minecraft.sounds.SoundEvents.WOLF_GROWL_BABY.value(), 1.0F, 0.5F);
-
-
         }
 
         this.nightCycle = new NightCycleManager(this);
