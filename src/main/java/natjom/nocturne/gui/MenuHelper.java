@@ -44,12 +44,15 @@ public class MenuHelper {
                 if (super.getItem(index).isEmpty()) return;
 
                 int optionIndex = index - finalStartSlot;
-                if (optionIndex >= 0 && optionIndex < options.size()) {
-                    onChoice.accept(optionIndex);
+
+                if (player.level().getServer() != null) {
+                    player.level().getServer().execute(() -> {
+                        player.closeContainer();
+                        if (optionIndex >= 0 && optionIndex < options.size()) {
+                            onChoice.accept(optionIndex);
+                        }
+                    });
                 }
-
-                player.level().getServer().execute(player::closeContainer);
-
             }
         };
 

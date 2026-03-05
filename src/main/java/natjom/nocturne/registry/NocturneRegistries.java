@@ -1,10 +1,7 @@
 package natjom.nocturne.registry;
 
 import natjom.nocturne.Nocturne;
-import natjom.nocturne.game.role.RobberRole;
-import natjom.nocturne.game.role.Role;
-import natjom.nocturne.game.role.VillagerRole;
-import natjom.nocturne.game.role.WolfRole;
+import natjom.nocturne.game.role.*;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
@@ -29,6 +26,12 @@ public class NocturneRegistries {
 
     public static final DeferredHolder<Role, Role> VOLEUR =
             ROLES.register("voleur", RobberRole::new);
+
+    public static final DeferredHolder<Role, Role> NOISEUSE =
+            ROLES.register("noiseuse", NoiseuseRole::new);
+
+    public static final DeferredHolder<Role, Role> VOYANTE =
+            ROLES.register("voyante", VoyanteRole::new);
 
 
 }
