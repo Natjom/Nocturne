@@ -127,6 +127,13 @@ public class NocturneCommand {
                             return 1;
                         })
                 )
+                .then(Commands.literal("composet")
+                        .executes(context -> {
+                            ServerPlayer player = context.getSource().getPlayerOrException();
+                            MenuHelper.openCompoSetMenu(player);
+                            return 1;
+                        })
+                )
         );
     }
 }

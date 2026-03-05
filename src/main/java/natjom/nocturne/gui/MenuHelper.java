@@ -143,4 +143,76 @@ public class MenuHelper {
                 Component.literal("§8Composition de la partie")
         ));
     }
+
+    public static void openCompoSetMenu(ServerPlayer player) {
+        List<ItemStack> options = new java.util.ArrayList<>();
+        natjom.nocturne.game.CompoSet[] sets = natjom.nocturne.game.CompoSet.values();
+
+        for (natjom.nocturne.game.CompoSet set : sets) {
+            ItemStack icon = new ItemStack(net.minecraft.world.item.Items.WRITTEN_BOOK);
+            boolean isActive = (natjom.nocturne.game.CompositionManager.activeCompoSet == set);
+            int count = isActive ? natjom.nocturne.game.CompositionManager.activeCompoPlayerCount : set.getMinPlayers();
+
+            if (count > 0 && count <= 64) {
+                icon.setCount(count);
+            }
+
+            if (isActive) {
+                icon.set(net.minecraft.core.component.DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true);
+            }
+
+            net.minecraft.network.chat.MutableComponent name = Component.literal(set.getDisplayName());
+            if (isActive) {
+                name.append(" §a(Sélectionné : " + count + " joueurs)");
+            } else {
+                name.append(" §7(" + set.getMinPlayers() + "-" + set.getMaxPlayers() + " joueurs)");
+            }
+
+            icon.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, name);
+            options.add(icon);
+        }
+
+        net.minecraft.world.SimpleContainer container = new net.minecraft.world.SimpleContainer(27) {
+            @Override
+            public @NonNull ItemStack removeItem(int index, int count) { triggerChoice(index); return ItemStack.EMPTY; }
+            @Override
+            public @NonNull ItemStack removeItemNoUpdate(int index) { triggerChoice(index); return ItemStack.EMPTY; }
+            @Override
+            public void setItem(int index, @NonNull ItemStack stack) {
+                if (this.getItem(index).isEmpty()) super.setItem(index, stack);
+            }
+
+            private void triggerChoice(int index) {
+                if (super.getItem(index).isEmpty()) return;
+
+                if (player.level().getServer() != null) {
+                    player.level().getServer().execute(() -> {
+                        if (index >= 0 && index < sets.length) {
+                            natjom.nocturne.game.CompoSet clickedSet = sets[index];
+                            int newCount = clickedSet.getMinPlayers();
+
+                            if (natjom.nocturne.game.CompositionManager.activeCompoSet == clickedSet) {
+                                newCount = natjom.nocturne.game.CompositionManager.activeCompoPlayerCount + 1;
+                                if (newCount > clickedSet.getMaxPlayers()) {
+                                    newCount = clickedSet.getMinPlayers();
+                                }
+                            }
+
+                            natjom.nocturne.game.CompositionManager.applyCompoSet(clickedSet, newCount);
+                            openCompoSetMenu(player);
+                        }
+                    });
+                }
+            }
+        };
+
+        for (int i = 0; i < options.size(); i++) {
+            container.setItem(i, options.get(i));
+        }
+
+        player.openMenu(new net.minecraft.world.SimpleMenuProvider(
+                (id, inv, p) -> new ChoiceMenu(id, inv, container),
+                Component.literal("§8Sélection du Set de Partie")
+        ));
+    }
 }

@@ -13,6 +13,8 @@ import java.util.Map;
 
 public class CompositionManager {
     public static final Map<Role, Integer> COMPOSITION = new HashMap<>();
+    public static CompoSet activeCompoSet = null;
+    public static int activeCompoPlayerCount = 0;
 
     public static void initDefault() {
         if (COMPOSITION.isEmpty()) {
@@ -27,7 +29,25 @@ public class CompositionManager {
         }
     }
 
+    public static void applyCompoSet(CompoSet set, int playerCount) {
+        COMPOSITION.clear();
+        activeCompoSet = set;
+        activeCompoPlayerCount = playerCount;
+
+        NocturneRegistries.ROLES.getEntries().forEach(entry -> COMPOSITION.put(entry.get(), 0));
+
+        int cardsNeeded = playerCount + 3;
+        List<java.util.function.Supplier<Role>> roles = set.getRoleList();
+
+        for (int i = 0; i < Math.min(cardsNeeded, roles.size()); i++) {
+            Role role = roles.get(i).get();
+            COMPOSITION.put(role, COMPOSITION.getOrDefault(role, 0) + 1);
+        }
+    }
+
     public static void cycleRole(Role role) {
+        activeCompoSet = null;
+
         int current = COMPOSITION.getOrDefault(role, 0);
 
         if (role instanceof VillageoisRole || role instanceof LoupRole) {
