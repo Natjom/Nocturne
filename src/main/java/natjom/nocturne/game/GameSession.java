@@ -186,7 +186,7 @@ public class GameSession {
                         sp.sendSystemMessage(Component.literal("§4" + deadPlayer.getPlainTextName() + " a été éliminé !"));
 
                         if (sp.getUUID().equals(deadId)) {
-                            net.minecraft.server.level.ServerLevel sLevel = (net.minecraft.server.level.ServerLevel) deadPlayer.level();
+                            net.minecraft.server.level.ServerLevel sLevel = deadPlayer.level();
                             net.minecraft.world.entity.LightningBolt lightning = net.minecraft.world.entity.EntityType.LIGHTNING_BOLT.create(sLevel, net.minecraft.world.entity.EntitySpawnReason.COMMAND);
 
                             if (lightning != null) {
