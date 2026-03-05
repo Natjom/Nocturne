@@ -9,7 +9,7 @@ import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
 
-public class WolfRole extends Role {
+public class LoupRole extends Role {
 
     @Override
     public Component getDisplayName() {
@@ -32,7 +32,7 @@ public class WolfRole extends Role {
     @Override
     public void onWakeUp(ServerPlayer player, GameSession session) {
         long wolfCount = session.getServerPlayers().stream()
-                .filter(p -> session.getBoard().getInitialRole(p.getUUID()) instanceof WolfRole)
+                .filter(p -> session.getBoard().getInitialRole(p.getUUID()) instanceof LoupRole)
                 .count();
 
         if (wolfCount == 1) {

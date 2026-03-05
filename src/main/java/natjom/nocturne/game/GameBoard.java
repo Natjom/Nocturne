@@ -58,4 +58,12 @@ public class GameBoard {
         this.currentRoles.put(player2, role1);
     }
 
+    public void swapPlayerWithCenter(java.util.UUID player, int centerIndex) {
+        natjom.nocturne.game.role.Role playerRole = this.getCurrentRole(player);
+        natjom.nocturne.game.role.Role centerRole = this.getCenterCard(centerIndex);
+
+        this.currentRoles.put(player, centerRole);
+        this.centerCards.set(centerIndex, playerRole);
+    }
+
 }

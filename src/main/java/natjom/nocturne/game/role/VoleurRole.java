@@ -10,7 +10,7 @@ import net.minecraft.world.item.ItemStack;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RobberRole extends Role {
+public class VoleurRole extends Role {
 
     @Override
     public Component getDisplayName() {

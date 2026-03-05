@@ -19,13 +19,13 @@ public class NocturneRegistries {
     public static final Registry<Role> REGISTRY = ROLES.makeRegistry(builder -> { builder.defaultKey(Identifier.fromNamespaceAndPath(Nocturne.MODID, "villageois")); });
 
     public static final DeferredHolder<Role, Role> VILLAGEOIS =
-            ROLES.register("villageois", VillagerRole::new);
+            ROLES.register("villageois", VillageoisRole::new);
 
     public static final DeferredHolder<Role, Role> LOUP_GAROU =
-            ROLES.register("loup_garou", WolfRole::new);
+            ROLES.register("loup_garou", LoupRole::new);
 
     public static final DeferredHolder<Role, Role> VOLEUR =
-            ROLES.register("voleur", RobberRole::new);
+            ROLES.register("voleur", VoleurRole::new);
 
     public static final DeferredHolder<Role, Role> NOISEUSE =
             ROLES.register("noiseuse", NoiseuseRole::new);
