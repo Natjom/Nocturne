@@ -10,8 +10,6 @@ public abstract class Role {
 
     public abstract int getNightOrder();
 
-    // public abstract String getSkinTexture();
-
     public abstract String getSkinTexture();
 
     public boolean hasNightAction() { return false; }
