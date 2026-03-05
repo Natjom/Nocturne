@@ -1,6 +1,7 @@
-package natjom.nocturne.game.role;
+package natjom.nocturne.game.role.base;
 
 import natjom.nocturne.game.GameSession;
+import natjom.nocturne.game.role.Role;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 

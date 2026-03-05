@@ -1,9 +1,9 @@
 package natjom.nocturne.game;
 
-import natjom.nocturne.game.role.LoupRole;
+import natjom.nocturne.game.role.base.LoupRole;
 import natjom.nocturne.game.role.Role;
-import natjom.nocturne.game.role.SoeursRole;
-import natjom.nocturne.game.role.VillageoisRole;
+import natjom.nocturne.game.role.base.SoeursRole;
+import natjom.nocturne.game.role.base.VillageoisRole;
 import natjom.nocturne.registry.NocturneRegistries;
 
 import java.util.ArrayList;

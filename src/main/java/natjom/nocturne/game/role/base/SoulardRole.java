@@ -1,6 +1,7 @@
-package natjom.nocturne.game.role;
+package natjom.nocturne.game.role.base;
 
 import natjom.nocturne.game.GameSession;
+import natjom.nocturne.game.role.Role;
 import natjom.nocturne.gui.MenuHelper;
 import natjom.nocturne.util.MenuIcons;
 import net.minecraft.network.chat.Component;
@@ -9,7 +10,6 @@ import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public class SoulardRole extends Role {
 

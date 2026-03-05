@@ -2,6 +2,7 @@ package natjom.nocturne.registry;
 
 import natjom.nocturne.Nocturne;
 import natjom.nocturne.game.role.*;
+import natjom.nocturne.game.role.base.*;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;

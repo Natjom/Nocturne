@@ -1,18 +1,16 @@
 package natjom.nocturne.game;
 
-import natjom.nocturne.registry.NocturneRegistries;
+import natjom.nocturne.game.role.base.ChasseurRole;
 import natjom.nocturne.game.role.Role;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.item.ItemStack;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class GameSession {
     private final List<ServerPlayer> serverPlayers;
@@ -114,15 +112,15 @@ public class GameSession {
 
 
         for (ServerPlayer sp : this.serverPlayers) {
-            sp.sendSystemMessage(net.minecraft.network.chat.Component.literal("§cLe temps est écoulé ! C'est l'heure du vote..."));
-            sp.playSound(net.minecraft.sounds.SoundEvents.BELL_BLOCK, 1.0F, 1.0F);
+            sp.sendSystemMessage(Component.literal("§cLe temps est écoulé ! C'est l'heure du vote..."));
+            sp.playSound(SoundEvents.BELL_BLOCK, 1.0F, 1.0F);
             openVoteMenu(sp);
         }
     }
 
     private void openVoteMenu(ServerPlayer player) {
-        java.util.List<net.minecraft.world.item.ItemStack> options = new java.util.ArrayList<>();
-        java.util.List<ServerPlayer> validTargets = new java.util.ArrayList<>();
+        java.util.List<ItemStack> options = new java.util.ArrayList<>();
+        List<ServerPlayer> validTargets = new ArrayList<>();
 
         for (ServerPlayer target : this.serverPlayers) {
             if (!target.getUUID().equals(player.getUUID())) {
@@ -134,7 +132,7 @@ public class GameSession {
         natjom.nocturne.gui.MenuHelper.openChoiceMenu(player, "§8Votez pour éliminer", options, index -> {
             ServerPlayer target = validTargets.get(index);
             this.votes.put(player.getUUID(), target.getUUID());
-            player.sendSystemMessage(net.minecraft.network.chat.Component.literal("§aTu as voté contre " + target.getPlainTextName() + "."));
+            player.sendSystemMessage(Component.literal("§aTu as voté contre " + target.getPlainTextName() + "."));
             checkVotes();
         });
     }
@@ -146,9 +144,9 @@ public class GameSession {
     }
 
     private void resolveVotes() {
-        java.util.Map<java.util.UUID, Integer> voteCounts = new java.util.HashMap<>();
+        Map<UUID, Integer> voteCounts = new HashMap<>();
 
-        for (java.util.UUID target : this.votes.values()) {
+        for (UUID target : this.votes.values()) {
             voteCounts.put(target, voteCounts.getOrDefault(target, 0) + 1);
         }
 
@@ -161,22 +159,22 @@ public class GameSession {
 
         if (maxVotes <= 1) {
             for (ServerPlayer sp : this.serverPlayers) {
-                sp.sendSystemMessage(net.minecraft.network.chat.Component.literal("§eÉgalité parfaite (1 vote max). Personne n'est éliminé !"));
+                sp.sendSystemMessage(Component.literal("§eÉgalité parfaite (1 vote max). Personne n'est éliminé !"));
             }
             return;
         }
 
-        java.util.List<java.util.UUID> eliminated = new java.util.ArrayList<>();
-        for (java.util.Map.Entry<java.util.UUID, Integer> entry : voteCounts.entrySet()) {
+        List<UUID> eliminated = new ArrayList<>();
+        for (Map.Entry<UUID, Integer> entry : voteCounts.entrySet()) {
             if (entry.getValue() == maxVotes) {
                 eliminated.add(entry.getKey());
             }
         }
 
-        java.util.List<java.util.UUID> extraEliminations = new java.util.ArrayList<>();
-        for (java.util.UUID deadId : eliminated) {
-            natjom.nocturne.game.role.Role deadRole = this.board.getCurrentRole(deadId);
-            if (deadRole instanceof natjom.nocturne.game.role.ChasseurRole) {
+        List<UUID> extraEliminations = new ArrayList<>();
+        for (UUID deadId : eliminated) {
+            Role deadRole = this.board.getCurrentRole(deadId);
+            if (deadRole instanceof ChasseurRole) {
                 java.util.UUID hunterTarget = this.votes.get(deadId);
                 if (hunterTarget != null && !eliminated.contains(hunterTarget) && !extraEliminations.contains(hunterTarget)) {
                     extraEliminations.add(hunterTarget);

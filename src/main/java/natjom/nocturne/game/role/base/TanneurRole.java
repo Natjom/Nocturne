@@ -1,5 +1,6 @@
-package natjom.nocturne.game.role;
+package natjom.nocturne.game.role.base;
 
+import natjom.nocturne.game.role.Role;
 import net.minecraft.network.chat.Component;
 
 public class TanneurRole extends Role {
