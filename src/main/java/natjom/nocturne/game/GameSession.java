@@ -5,7 +5,10 @@ import natjom.nocturne.game.role.Role;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerBossEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.BossEvent;
+import net.minecraft.world.effect.MobEffects;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,7 +53,7 @@ public class GameSession {
 
     public void togglePause() { this.isPaused = !this.isPaused; }
 
-    public void registerSkip(net.minecraft.server.level.ServerPlayer player) {
+    public void registerSkip(ServerPlayer player) {
         if (this.currentState != GameState.DAY) {
             return;
         }
@@ -58,7 +61,7 @@ public class GameSession {
         this.skipVotes.add(player.getUUID());
         int required = (int) Math.ceil(this.serverPlayers.size() * 0.66);
 
-        for (net.minecraft.server.level.ServerPlayer sp : this.serverPlayers) {
+        for (ServerPlayer sp : this.serverPlayers) {
             sp.sendSystemMessage(net.minecraft.network.chat.Component.literal("§e" + player.getPlainTextName() + " veut passer au vote (" + this.skipVotes.size() + "/" + required + ")."));
         }
 
@@ -78,9 +81,10 @@ public class GameSession {
                 BossEvent.BossBarOverlay.PROGRESS
         );
 
-        for (net.minecraft.server.level.ServerPlayer sp : this.serverPlayers) {
+        for (ServerPlayer sp : this.serverPlayers) {
             sp.sendSystemMessage(net.minecraft.network.chat.Component.literal("§6Le jour se lève sur le village ! Il est temps de débattre..."));
             this.dayBossBar.addPlayer(sp);
+            sp.playSound(net.minecraft.sounds.SoundEvents.PLAYER_LEVELUP, 1.0F, 1.0F);
         }
     }
 
@@ -108,17 +112,19 @@ public class GameSession {
             this.dayBossBar.removeAllPlayers();
         }
 
-        for (net.minecraft.server.level.ServerPlayer sp : this.serverPlayers) {
+
+        for (ServerPlayer sp : this.serverPlayers) {
             sp.sendSystemMessage(net.minecraft.network.chat.Component.literal("§cLe temps est écoulé ! C'est l'heure du vote..."));
+            sp.playSound(net.minecraft.sounds.SoundEvents.BELL_BLOCK, 1.0F, 1.0F);
             openVoteMenu(sp);
         }
     }
 
-    private void openVoteMenu(net.minecraft.server.level.ServerPlayer player) {
+    private void openVoteMenu(ServerPlayer player) {
         java.util.List<net.minecraft.world.item.ItemStack> options = new java.util.ArrayList<>();
-        java.util.List<net.minecraft.server.level.ServerPlayer> validTargets = new java.util.ArrayList<>();
+        java.util.List<ServerPlayer> validTargets = new java.util.ArrayList<>();
 
-        for (net.minecraft.server.level.ServerPlayer target : this.serverPlayers) {
+        for (ServerPlayer target : this.serverPlayers) {
             if (!target.getUUID().equals(player.getUUID())) {
                 options.add(natjom.nocturne.util.MenuIcons.makePlayerHead(target, "§c"));
                 validTargets.add(target);
@@ -126,7 +132,7 @@ public class GameSession {
         }
 
         natjom.nocturne.gui.MenuHelper.openChoiceMenu(player, "§8Votez pour éliminer", options, index -> {
-            net.minecraft.server.level.ServerPlayer target = validTargets.get(index);
+            ServerPlayer target = validTargets.get(index);
             this.votes.put(player.getUUID(), target.getUUID());
             player.sendSystemMessage(net.minecraft.network.chat.Component.literal("§aTu as voté contre " + target.getPlainTextName() + "."));
             checkVotes();
@@ -154,7 +160,7 @@ public class GameSession {
         }
 
         if (maxVotes <= 1) {
-            for (net.minecraft.server.level.ServerPlayer sp : this.serverPlayers) {
+            for (ServerPlayer sp : this.serverPlayers) {
                 sp.sendSystemMessage(net.minecraft.network.chat.Component.literal("§eÉgalité parfaite (1 vote max). Personne n'est éliminé !"));
             }
             return;
@@ -179,11 +185,26 @@ public class GameSession {
         }
         eliminated.addAll(extraEliminations);
 
-        for (net.minecraft.server.level.ServerPlayer sp : this.serverPlayers) {
+        for (ServerPlayer sp : this.serverPlayers) {
+            sp.removeEffect(MobEffects.RESISTANCE);
+            sp.removeEffect(MobEffects.SATURATION);
+            sp.removeEffect(MobEffects.WEAKNESS);
+
             for (java.util.UUID deadId : eliminated) {
                 net.minecraft.server.level.ServerPlayer deadPlayer = sp.level().getServer().getPlayerList().getPlayer(deadId);
                 if (deadPlayer != null) {
                     sp.sendSystemMessage(net.minecraft.network.chat.Component.literal("§4" + deadPlayer.getPlainTextName() + " a été éliminé !"));
+
+                    if (sp.getUUID().equals(deadId)) {
+                        net.minecraft.server.level.ServerLevel sLevel = (net.minecraft.server.level.ServerLevel) deadPlayer.level();
+                        net.minecraft.world.entity.LightningBolt lightning = net.minecraft.world.entity.EntityType.LIGHTNING_BOLT.create(sLevel, net.minecraft.world.entity.EntitySpawnReason.COMMAND);
+
+                        if (lightning != null) {
+                            lightning.setPos(deadPlayer.getX(), deadPlayer.getY(), deadPlayer.getZ());
+                            lightning.setVisualOnly(true);
+                            sLevel.addFreshEntity(lightning);
+                        }
+                    }
                 }
             }
         }
@@ -198,7 +219,7 @@ public class GameSession {
 
         int requiredCards = this.players.size() + 3;
         if (deck.size() != requiredCards) {
-            for (net.minecraft.server.level.ServerPlayer sp : this.serverPlayers) {
+            for (ServerPlayer sp : this.serverPlayers) {
                 sp.sendSystemMessage(net.minecraft.network.chat.Component.literal("§cImpossible de lancer ! Il y a " + deck.size() + " rôles sélectionnés pour " + this.players.size() + " joueurs."));
                 sp.sendSystemMessage(net.minecraft.network.chat.Component.literal("§cIl faut exactement " + requiredCards + " cartes. Modifiez la /nocturne compo."));
             }
@@ -209,7 +230,7 @@ public class GameSession {
         this.board.setup(this.players, deck);
 
         this.addHistory("§e--- Distribution Initiale ---");
-        for (net.minecraft.server.level.ServerPlayer sp : this.serverPlayers) {
+        for (ServerPlayer sp : this.serverPlayers) {
             natjom.nocturne.game.role.Role initialRole = this.board.getInitialRole(sp.getUUID());
             this.addHistory(sp.getPlainTextName() + " a reçu : " + initialRole.getDisplayName().getString());
         }
@@ -229,6 +250,14 @@ public class GameSession {
             sp.sendSystemMessage(Component.literal("§eTon rôle est : §l" + role.getDisplayName().getString()));
             sp.sendSystemMessage(Component.literal("§8================================="));
             sp.sendSystemMessage(Component.literal("§7La nuit tombe sur le village..."));
+
+            sp.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.RESISTANCE, -1, 255, false, false, false));
+            sp.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.SATURATION, -1, 255, false, false, false));
+            sp.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.WEAKNESS, -1, 255, false, false, false));
+
+            sp.playSound(net.minecraft.sounds.SoundEvents.WOLF_GROWL_BABY.value(), 1.0F, 0.5F);
+
+
         }
 
         this.nightCycle = new NightCycleManager(this);
@@ -246,8 +275,13 @@ public class GameSession {
         }
 
         if (this.serverPlayers != null) {
-            for (net.minecraft.server.level.ServerPlayer sp : this.serverPlayers) {
-                sp.level().getServer().execute(sp::closeContainer);
+            for (ServerPlayer sp : this.serverPlayers) {
+                sp.level().getServer().execute(() -> {
+                    sp.closeContainer();
+                    sp.removeEffect(net.minecraft.world.effect.MobEffects.RESISTANCE);
+                    sp.removeEffect(net.minecraft.world.effect.MobEffects.SATURATION);
+                    sp.removeEffect(net.minecraft.world.effect.MobEffects.WEAKNESS);
+                });
             }
         }
     }
@@ -258,7 +292,7 @@ public class GameSession {
 
     public void displayHistory() {
         this.addHistory("§e--- Rôles Finaux ---");
-        for (net.minecraft.server.level.ServerPlayer sp : this.serverPlayers) {
+        for (ServerPlayer sp : this.serverPlayers) {
             natjom.nocturne.game.role.Role finalRole = this.board.getCurrentRole(sp.getUUID());
             this.addHistory(sp.getPlainTextName() + " termine en tant que : " + finalRole.getDisplayName().getString());
         }
@@ -268,7 +302,7 @@ public class GameSession {
         }
         this.addHistory("§e-----------------------------");
 
-        for (net.minecraft.server.level.ServerPlayer sp : this.serverPlayers) {
+        for (ServerPlayer sp : this.serverPlayers) {
             sp.sendSystemMessage(net.minecraft.network.chat.Component.literal("§8=== [ Résumé de la Partie ] ==="));
             for (String event : this.gameHistory) {
                 sp.sendSystemMessage(net.minecraft.network.chat.Component.literal("§7- " + event));
