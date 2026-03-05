@@ -116,13 +116,17 @@ public class GameSession {
 
     private void openVoteMenu(net.minecraft.server.level.ServerPlayer player) {
         java.util.List<net.minecraft.world.item.ItemStack> options = new java.util.ArrayList<>();
+        java.util.List<net.minecraft.server.level.ServerPlayer> validTargets = new java.util.ArrayList<>();
 
         for (net.minecraft.server.level.ServerPlayer target : this.serverPlayers) {
-            options.add(natjom.nocturne.util.MenuIcons.makePlayerHead(target, "§c"));
+            if (!target.getUUID().equals(player.getUUID())) {
+                options.add(natjom.nocturne.util.MenuIcons.makePlayerHead(target, "§c"));
+                validTargets.add(target);
+            }
         }
 
         natjom.nocturne.gui.MenuHelper.openChoiceMenu(player, "§8Votez pour éliminer", options, index -> {
-            net.minecraft.server.level.ServerPlayer target = this.serverPlayers.get(index);
+            net.minecraft.server.level.ServerPlayer target = validTargets.get(index);
             this.votes.put(player.getUUID(), target.getUUID());
             player.sendSystemMessage(net.minecraft.network.chat.Component.literal("§aTu as voté contre " + target.getPlainTextName() + "."));
             checkVotes();
