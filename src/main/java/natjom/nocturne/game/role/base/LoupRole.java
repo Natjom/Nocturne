@@ -9,6 +9,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
+import java.util.UUID;
 
 public class LoupRole extends Role {
 
@@ -58,5 +59,21 @@ public class LoupRole extends Role {
         } else {
             player.sendSystemMessage(Component.literal("§c[Nuit] Tu te réveilles avec tes alliés Loups. Vous vous regardez silencieusement."));
         }
+    }
+
+    @Override
+    public boolean didWin(GameSession session, UUID myId, List<UUID> eliminated) {
+        if (eliminated.contains(myId)) {
+            return false;
+        }
+
+        boolean wolfDied = false;
+        for (UUID deadId : eliminated) {
+            if (session.getBoard().getCurrentRole(deadId) instanceof LoupRole) {
+                wolfDied = true;
+            }
+        }
+
+        return !wolfDied;
     }
 }

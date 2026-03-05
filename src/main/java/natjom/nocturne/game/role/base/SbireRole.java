@@ -5,6 +5,7 @@ import natjom.nocturne.game.role.Role;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import java.util.List;
+import java.util.UUID;
 
 public class SbireRole extends Role {
 
@@ -38,4 +39,26 @@ public class SbireRole extends Role {
             session.addHistory("Le Sbire (" + player.getPlainTextName() + ") a vu les Loups : " + String.join(", ", wolfNames) + ".");
         }
     }
+
+    @Override
+    public boolean didWin(GameSession session, UUID myId, List<UUID> eliminated) {
+        boolean wolfDied = false;
+        boolean wolfInPlay = false;
+
+        for (net.minecraft.server.level.ServerPlayer p : session.getServerPlayers()) {
+            if (session.getBoard().getCurrentRole(p.getUUID()) instanceof LoupRole) {
+                wolfInPlay = true;
+                if (eliminated.contains(p.getUUID())) {
+                    wolfDied = true;
+                }
+            }
+        }
+
+        if (wolfInPlay) {
+            return !wolfDied;
+        } else {
+            return !eliminated.contains(myId);
+        }
+    }
+
 }
