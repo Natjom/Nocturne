@@ -1,6 +1,7 @@
-package natjom.nocturne.game.role;
+package natjom.nocturne.game.role.base;
 
 import natjom.nocturne.game.GameSession;
+import natjom.nocturne.game.role.Role;
 import natjom.nocturne.gui.MenuHelper;
 import natjom.nocturne.util.MenuIcons;
 import net.minecraft.network.chat.Component;
@@ -10,7 +11,7 @@ import net.minecraft.world.item.ItemStack;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RobberRole extends Role {
+public class VoleurRole extends Role {
 
     @Override
     public Component getDisplayName() {
@@ -19,12 +20,12 @@ public class RobberRole extends Role {
 
     @Override
     public int getNightOrder() {
-        return 30;
+        return 26;
     }
 
     @Override
     public String getSkinTexture() {
-        return "";
+        return "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjVkZGI4ZTE2Nzc5MmY3ODc1NDk2MjU0NThlMmVhNTVjOTJlNzBiYmRlNTVlYjUyZDk1NTQ5N2IyMTQ4NTZjOCJ9fX0=";
     }
 
     @Override

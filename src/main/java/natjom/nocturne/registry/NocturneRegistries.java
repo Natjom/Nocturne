@@ -1,10 +1,8 @@
 package natjom.nocturne.registry;
 
 import natjom.nocturne.Nocturne;
-import natjom.nocturne.game.role.RobberRole;
-import natjom.nocturne.game.role.Role;
-import natjom.nocturne.game.role.VillagerRole;
-import natjom.nocturne.game.role.WolfRole;
+import natjom.nocturne.game.role.*;
+import natjom.nocturne.game.role.base.*;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
@@ -22,13 +20,38 @@ public class NocturneRegistries {
     public static final Registry<Role> REGISTRY = ROLES.makeRegistry(builder -> { builder.defaultKey(Identifier.fromNamespaceAndPath(Nocturne.MODID, "villageois")); });
 
     public static final DeferredHolder<Role, Role> VILLAGEOIS =
-            ROLES.register("villageois", VillagerRole::new);
+            ROLES.register("villageois", VillageoisRole::new);
+
+    public static final DeferredHolder<Role, Role> CHASSEUR =
+            ROLES.register("chasseur", ChasseurRole::new);
+
+    public static final DeferredHolder<Role, Role> TANNEUR =
+            ROLES.register("tanneur", TanneurRole::new);
+
+    public static final DeferredHolder<Role, Role> SOSIE =
+            ROLES.register("sosie", SosieRole::new);
 
     public static final DeferredHolder<Role, Role> LOUP_GAROU =
-            ROLES.register("loup_garou", WolfRole::new);
+            ROLES.register("loup_garou", LoupRole::new);
+
+    public static final DeferredHolder<Role, Role> SBIRE =
+            ROLES.register("sbire", SbireRole::new);
+
+    public static final DeferredHolder<Role, Role> SOEUR =
+            ROLES.register("soeur", SoeursRole::new);
+
+    public static final DeferredHolder<Role, Role> VOYANTE =
+            ROLES.register("voyante", VoyanteRole::new);
 
     public static final DeferredHolder<Role, Role> VOLEUR =
-            ROLES.register("voleur", RobberRole::new);
+            ROLES.register("voleur", VoleurRole::new);
 
+    public static final DeferredHolder<Role, Role> NOISEUSE =
+            ROLES.register("noiseuse", NoiseuseRole::new);
 
+    public static final DeferredHolder<Role, Role> SOULARD =
+            ROLES.register("soulard", SoulardRole::new);
+
+    public static final DeferredHolder<Role, Role> INSOMNIAQUE =
+            ROLES.register("insomniaque", InsomniaqueRole::new);
 }
