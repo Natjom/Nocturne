@@ -193,15 +193,18 @@ public class GameSession {
 
 
     public void start() {
-        List<Role> deck = new ArrayList<>();
+        natjom.nocturne.game.CompositionManager.initDefault();
+        List<natjom.nocturne.game.role.Role> deck = natjom.nocturne.game.CompositionManager.buildDeck();
 
-        deck.add(NocturneRegistries.LOUP_GAROU.get());
-        deck.add(NocturneRegistries.VOLEUR.get());
-        deck.add(NocturneRegistries.NOISEUSE.get());
-        deck.add(NocturneRegistries.VOYANTE.get());
-        deck.add(NocturneRegistries.VILLAGEOIS.get());
-        deck.add(NocturneRegistries.VILLAGEOIS.get());
-
+        int requiredCards = this.players.size() + 3;
+        if (deck.size() != requiredCards) {
+            for (net.minecraft.server.level.ServerPlayer sp : this.serverPlayers) {
+                sp.sendSystemMessage(net.minecraft.network.chat.Component.literal("§cImpossible de lancer ! Il y a " + deck.size() + " rôles sélectionnés pour " + this.players.size() + " joueurs."));
+                sp.sendSystemMessage(net.minecraft.network.chat.Component.literal("§cIl faut exactement " + requiredCards + " cartes. Modifiez la /nocturne compo."));
+            }
+            this.currentState = GameState.IDLE;
+            return;
+        }
 
         this.board.setup(this.players, deck);
 

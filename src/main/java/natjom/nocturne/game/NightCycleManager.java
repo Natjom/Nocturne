@@ -56,6 +56,12 @@ public class NightCycleManager {
     }
 
     private void nextPhase() {
+        for (ServerPlayer player : session.getServerPlayers()) {
+            if (player.level().getServer() != null) {
+                player.level().getServer().execute(() -> player.closeContainer());
+            }
+        }
+
         currentPhaseIndex++;
 
         if (currentPhaseIndex >= wakeUpOrder.size()) {

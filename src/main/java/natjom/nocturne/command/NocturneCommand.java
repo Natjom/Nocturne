@@ -2,6 +2,7 @@ package natjom.nocturne.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import natjom.nocturne.game.GameSession;
+import natjom.nocturne.gui.MenuHelper;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
@@ -97,6 +98,13 @@ public class NocturneCommand {
 
                             currentSession.registerSkip(source.getPlayerOrException());
 
+                            return 1;
+                        })
+                )
+                .then(Commands.literal("compo")
+                        .executes(context -> {
+                            ServerPlayer player = context.getSource().getPlayerOrException();
+                            MenuHelper.openCompoMenu(player);
                             return 1;
                         })
                 )

@@ -1,8 +1,14 @@
 package natjom.nocturne.game.role;
 
 import natjom.nocturne.game.GameSession;
+import natjom.nocturne.gui.MenuHelper;
+import natjom.nocturne.util.MenuIcons;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class SoulardRole extends Role {
@@ -29,13 +35,19 @@ public class SoulardRole extends Role {
 
     @Override
     public void onWakeUp(ServerPlayer player, GameSession session) {
-        int randomCenterIndex = new Random().nextInt(3);
+        List<ItemStack> options = new ArrayList<>();
 
-        session.getBoard().swapPlayerWithCenter(player.getUUID(), randomCenterIndex);
+        for (int i = 0; i < 3; i++) {
+            options.add(MenuIcons.makeChoiceCard("Carte " + (i + 1)));
+        }
 
-        player.sendSystemMessage(Component.literal("§c[Nuit] Tu te réveilles en titubant..."));
-        player.sendSystemMessage(Component.literal("§dTu as échangé ta carte avec une carte du centre au hasard. Tu ne sais pas ce que tu es devenu !"));
+        MenuHelper.openChoiceMenu(player, "§8Soûlard : Quel centre ?", options, index -> {
+            session.getBoard().swapPlayerWithCenter(player.getUUID(), index);
 
-        session.addHistory("Le Soûlard (" + player.getPlainTextName() + ") a échangé sa carte avec le centre " + (randomCenterIndex + 1) + ".");
+            player.sendSystemMessage(Component.literal("§c[Nuit] Tu te réveilles en titubant..."));
+            player.sendSystemMessage(Component.literal("§dTu as échangé ta carte avec la carte du centre n°" + (index + 1) + ". Tu ne sais pas ce que tu es devenu !"));
+
+            session.addHistory("Le Soûlard (" + player.getPlainTextName() + ") a échangé sa carte avec le centre " + (index + 1) + ".");
+        });
     }
 }
