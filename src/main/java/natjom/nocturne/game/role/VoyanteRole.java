@@ -21,12 +21,12 @@ public class VoyanteRole extends Role {
 
     @Override
     public int getNightOrder() {
-        return 40;
+        return 21;
     }
 
     @Override
     public String getSkinTexture() {
-        return "";
+        return "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYzIzNDI2MmQ2OWU3NmQ5ODAyYTM1ZGE2Y2NkYjgzODM2YzliNGQ5MjFhNjhmMTA4ZWY0NDUwN2E4YjRjMjVlIn19fQ==";
     }
 
     @Override

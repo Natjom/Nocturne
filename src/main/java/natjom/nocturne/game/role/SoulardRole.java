@@ -14,12 +14,12 @@ public class SoulardRole extends Role {
 
     @Override
     public int getNightOrder() {
-        return 60;
+        return 33;
     }
 
     @Override
     public String getSkinTexture() {
-        return "";
+        return "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNmE4MGYwNzMyZmM0NzVjZGJlYjdhMDA3ZjFjYmE2MjZhYzdkZmRiZDUxZDY5ZmI3N2NiZjUyNDMxZWYxNDcyYyJ9fX0=";
     }
 
     @Override

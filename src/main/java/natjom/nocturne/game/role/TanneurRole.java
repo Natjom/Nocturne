@@ -16,6 +16,6 @@ public class TanneurRole extends Role {
 
     @Override
     public String getSkinTexture() {
-        return "";
+        return "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYTczMjUyMDY4ODA0MWU3YzIxMWI5YWNkMjc4YTA0MTZjOWNmNmRmY2U5OGQ0YmZhNTI4NmYxNWViMzg2M2YzOCJ9fX0=";
     }
 }

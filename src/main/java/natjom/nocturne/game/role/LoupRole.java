@@ -13,16 +13,16 @@ public class LoupRole extends Role {
 
     @Override
     public Component getDisplayName() {
-        return Component.literal("Loup-Garou");
+        return Component.literal("Loup");
     }
 
     @Override
     public int getNightOrder() {
-        return 10;
+        return 13;
     }
 
     @Override
-    public String getSkinTexture() { return ""; }
+    public String getSkinTexture() { return "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMjY1NTVhOTAwOWUyZmZhNjY5Nzg2YWI4YWViZGZlZTM3ZmE1MWY3OWRiODM0MDgwNWZlNjk3MDk0Zjk2YjMwMSJ9fX0="; }
 
     @Override
     public boolean hasNightAction() {
