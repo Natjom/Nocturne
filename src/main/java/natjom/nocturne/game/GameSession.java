@@ -3,6 +3,8 @@ package natjom.nocturne.game;
 import natjom.nocturne.game.role.base.ChasseurRole;
 import natjom.nocturne.game.role.Role;
 import natjom.nocturne.game.role.base.SosieRole;
+import natjom.nocturne.game.role.crepuscule.PoliticienRole;
+import natjom.nocturne.game.role.crepuscule.ProtecteurRole;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerBossEvent;
@@ -159,25 +161,53 @@ public class GameSession {
             voteCounts.put(target, voteCounts.getOrDefault(target, 0) + 1);
         }
 
-        int maxVotes = 0;
-        for (int count : voteCounts.values()) {
-            if (count > maxVotes) {
-                maxVotes = count;
+        Set<UUID> protectedPlayers = new HashSet<>();
+        for (ServerPlayer sp : this.serverPlayers) {
+            Role role = this.board.getCurrentRole(sp.getUUID());
+
+            if (role instanceof PoliticienRole || (role instanceof SosieRole && ((SosieRole) role).getCopiedRole() instanceof PoliticienRole)) {
+                protectedPlayers.add(sp.getUUID());
+            }
+
+            if (role instanceof ProtecteurRole || (role instanceof SosieRole && ((SosieRole) role).getCopiedRole() instanceof ProtecteurRole)) {
+                UUID protectedByBodyguard = this.votes.get(sp.getUUID());
+                if (protectedByBodyguard != null) {
+                    protectedPlayers.add(protectedByBodyguard);
+                }
             }
         }
 
-        if (maxVotes <= 1) {
-            for (ServerPlayer sp : this.serverPlayers) {
-                sp.sendSystemMessage(Component.literal("§eÉgalité parfaite (1 vote max). Personne n'est éliminé !"));
-            }
-        } else {
-            List<UUID> eliminated = new ArrayList<>();
+        List<Integer> distinctVoteCounts = voteCounts.values().stream()
+                .distinct()
+                .sorted(Comparator.reverseOrder())
+                .toList();
+
+        List<UUID> eliminated = new ArrayList<>();
+        for (int count : distinctVoteCounts) {
+            if (count <= 1) break;
+
+            List<UUID> candidates = new ArrayList<>();
             for (Map.Entry<UUID, Integer> entry : voteCounts.entrySet()) {
-                if (entry.getValue() == maxVotes) {
-                    eliminated.add(entry.getKey());
+                if (entry.getValue() == count) {
+                    candidates.add(entry.getKey());
                 }
             }
 
+            List<UUID> unprotectedCandidates = candidates.stream()
+                    .filter(id -> !protectedPlayers.contains(id))
+                    .toList();
+
+            if (!unprotectedCandidates.isEmpty()) {
+                eliminated.addAll(unprotectedCandidates);
+                break;
+            }
+        }
+
+        if (eliminated.isEmpty()) {
+            for (ServerPlayer sp : this.serverPlayers) {
+                sp.sendSystemMessage(Component.literal("§eÉgalité parfaite. Personne n'est éliminé !"));
+            }
+        } else {
             List<UUID> extraEliminations = new ArrayList<>();
             for (UUID deadId : eliminated) {
                 Role deadRole = this.board.getCurrentRole(deadId);

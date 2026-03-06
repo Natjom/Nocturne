@@ -3,11 +3,15 @@ package natjom.nocturne.registry;
 import natjom.nocturne.Nocturne;
 import natjom.nocturne.game.role.*;
 import natjom.nocturne.game.role.base.*;
+import natjom.nocturne.game.role.crepuscule.PoliticienRole;
+import natjom.nocturne.game.role.crepuscule.ProtecteurRole;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
+
+import javax.swing.*;
 
 public class NocturneRegistries {
 
@@ -27,6 +31,12 @@ public class NocturneRegistries {
 
     public static final DeferredHolder<Role, Role> TANNEUR =
             ROLES.register("tanneur", TanneurRole::new);
+
+    public static final DeferredHolder<Role, Role> POLITICIEN =
+            ROLES.register("politicien", PoliticienRole::new);
+
+    public static final DeferredHolder<Role, Role> PROTECTEUR =
+            ROLES.register("protecteur", ProtecteurRole::new);
 
     public static final DeferredHolder<Role, Role> SOSIE =
             ROLES.register("sosie", SosieRole::new);
@@ -54,4 +64,5 @@ public class NocturneRegistries {
 
     public static final DeferredHolder<Role, Role> INSOMNIAQUE =
             ROLES.register("insomniaque", InsomniaqueRole::new);
+
 }
