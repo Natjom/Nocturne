@@ -96,6 +96,16 @@ public class GameSession {
                 this.endDay();
             }
         }
+
+        if (this.currentState == GameState.VOTE) {
+            for (ServerPlayer player : this.serverPlayers) {
+                if (!this.votes.containsKey(player.getUUID())) {
+                    if (player.containerMenu == player.inventoryMenu) {
+                        this.openVoteMenu(player);
+                    }
+                }
+            }
+        }
     }
 
     public void endDay() {
