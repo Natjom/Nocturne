@@ -25,7 +25,7 @@ public class SosieRole extends Role {
 
     @Override
     public String getSkinTexture() {
-        return "";
+        return "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODJiM2IwOTM5NjI1YWY4YzJmNWVkOGMyNjlkM2JhNjZmNWI2NWNlM2I1MjVkNmMxZTA1ZjRlN2NkZWJkMzljYiJ9fX0=";
     }
 
     @Override
