@@ -98,10 +98,13 @@ public class GameSession {
         }
 
         if (this.currentState == GameState.VOTE) {
-            for (ServerPlayer player : this.serverPlayers) {
-                if (!this.votes.containsKey(player.getUUID())) {
-                    if (player.containerMenu == player.inventoryMenu) {
-                        this.openVoteMenu(player);
+            this.dayTimer++;
+            if (this.dayTimer % 20 == 0) {
+                for (ServerPlayer player : this.serverPlayers) {
+                    if (!this.votes.containsKey(player.getUUID())) {
+                        if (player.containerMenu == player.inventoryMenu) {
+                            this.openVoteMenu(player);
+                        }
                     }
                 }
             }
@@ -109,7 +112,7 @@ public class GameSession {
     }
 
     public void endDay() {
-        this.currentState = GameState.END;
+        this.currentState = GameState.VOTE;
 
         if (this.dayBossBar != null) {
             this.dayBossBar.removeAllPlayers();
@@ -148,6 +151,8 @@ public class GameSession {
     }
 
     private void resolveVotes() {
+        this.currentState = GameState.END;
+
         Map<UUID, Integer> voteCounts = new HashMap<>();
 
         for (UUID target : this.votes.values()) {

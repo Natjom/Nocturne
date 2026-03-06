@@ -36,12 +36,11 @@ public class LoupRole extends Role {
 
     @Override
     public void onWakeUp(ServerPlayer player, GameSession session) {
-        Stream<ServerPlayer> wolfPack = session.getServerPlayers().stream()
-                .filter(p -> session.getBoard().getInitialRole(p.getUUID()) instanceof LoupRole);
+        List<ServerPlayer> wolfPack = session.getServerPlayers().stream()
+                .filter(p -> session.getBoard().getInitialRole(p.getUUID()) instanceof LoupRole)
+                .toList();
 
-        long wolfCount = wolfPack.count();
-
-        if (wolfCount == 1) {
+        if (wolfPack.size() == 1) {
             player.sendSystemMessage(Component.literal("§c[Nuit] Tu te réveilles seul. Choisis une carte du centre à regarder :"));
 
             List<ItemStack> options = List.of(
@@ -61,8 +60,13 @@ public class LoupRole extends Role {
             });
 
         } else {
-            List<String> wolfNames = wolfPack.map(Player::getPlainTextName).collect(Collectors.toList());
+            List<String> wolfNames = wolfPack.stream()
+                    .filter(p -> !p.getUUID().equals(player.getUUID()))
+                    .map(net.minecraft.world.entity.player.Player::getPlainTextName)
+                    .toList();
+
             player.sendSystemMessage(Component.literal("§cLes autres Loups sont : " + String.join(", ", wolfNames)));
+            session.addHistory("Le Loup (" + player.getPlainTextName() + ") a vu sa meute.");
         }
     }
 
