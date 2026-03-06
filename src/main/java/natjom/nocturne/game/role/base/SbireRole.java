@@ -44,19 +44,18 @@ public class SbireRole extends Role {
     }
 
     @Override
-    public boolean didWin(GameSession session, UUID myId, List<UUID> eliminated) {
-        boolean wolfDied = false;
+    public boolean didWin(natjom.nocturne.game.GameSession session, UUID myId, List<UUID> eliminated) {
         boolean wolfInPlay = false;
-
-        for (net.minecraft.server.level.ServerPlayer p : session.getServerPlayers()) {
-            if (session.getBoard().getCurrentRole(p.getUUID()) instanceof LoupRole) {
+        boolean wolfDied = false;
+        for (ServerPlayer p : session.getServerPlayers()) {
+            Role r = session.getBoard().getCurrentRole(p.getUUID());
+            if (r instanceof LoupRole || (r instanceof SosieRole && ((SosieRole) r).getCopiedRole() instanceof LoupRole)) {
                 wolfInPlay = true;
                 if (eliminated.contains(p.getUUID())) {
                     wolfDied = true;
                 }
             }
         }
-
         if (wolfInPlay) {
             return !wolfDied;
         } else {

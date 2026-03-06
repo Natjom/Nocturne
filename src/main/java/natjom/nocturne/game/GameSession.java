@@ -2,6 +2,7 @@ package natjom.nocturne.game;
 
 import natjom.nocturne.game.role.base.ChasseurRole;
 import natjom.nocturne.game.role.Role;
+import natjom.nocturne.game.role.base.SosieRole;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerBossEvent;
@@ -20,7 +21,7 @@ public class GameSession {
     private NightCycleManager nightCycle;
     private boolean isPaused = false;
     private int dayTimer;
-    private final int maxDayTime = 3600;
+    private final int maxDayTime = 8400;
     private ServerBossEvent dayBossBar;
     private final Map<UUID, UUID> votes = new HashMap<>();
     private final Set<UUID> skipVotes = new HashSet<>();
@@ -165,7 +166,11 @@ public class GameSession {
             List<UUID> extraEliminations = new ArrayList<>();
             for (UUID deadId : eliminated) {
                 Role deadRole = this.board.getCurrentRole(deadId);
-                if (deadRole instanceof ChasseurRole) {
+
+                boolean isHunter = deadRole instanceof ChasseurRole;
+                boolean isSosieHunter = (deadRole instanceof SosieRole) && (((SosieRole) deadRole).getCopiedRole() instanceof ChasseurRole);
+
+                if (isHunter || isSosieHunter) {
                     UUID hunterTarget = this.votes.get(deadId);
                     if (hunterTarget != null && !eliminated.contains(hunterTarget) && !extraEliminations.contains(hunterTarget)) {
                         extraEliminations.add(hunterTarget);
@@ -336,7 +341,7 @@ public class GameSession {
 
     public void displayHistory() {
         this.addHistory("§e--- Rôles Finaux ---");
-        for (ServerPlayer sp : this.serverPlayers) {
+        for (net.minecraft.server.level.ServerPlayer sp : this.serverPlayers) {
             natjom.nocturne.game.role.Role finalRole = this.board.getCurrentRole(sp.getUUID());
             this.addHistory(sp.getPlainTextName() + " termine en tant que : " + finalRole.getDisplayName().getString());
         }
@@ -344,14 +349,23 @@ public class GameSession {
             natjom.nocturne.game.role.Role centerRole = this.board.getCenterCard(i);
             this.addHistory("Centre " + (i + 1) + " : " + centerRole.getDisplayName().getString());
         }
+
+        this.addHistory("§e--- Historique des Votes ---");
+        for (java.util.Map.Entry<java.util.UUID, java.util.UUID> entry : this.votes.entrySet()) {
+            net.minecraft.server.level.ServerPlayer voter = this.serverPlayers.stream().filter(p -> p.getUUID().equals(entry.getKey())).findFirst().orElse(null);
+            net.minecraft.server.level.ServerPlayer target = this.serverPlayers.stream().filter(p -> p.getUUID().equals(entry.getValue())).findFirst().orElse(null);
+            if (voter != null && target != null) {
+                this.addHistory("§7" + voter.getPlainTextName() + " a voté contre " + target.getPlainTextName());
+            }
+        }
         this.addHistory("§e-----------------------------");
 
-        for (ServerPlayer sp : this.serverPlayers) {
-            sp.sendSystemMessage(Component.literal("§8=== [ Résumé de la Partie ] ==="));
+        for (net.minecraft.server.level.ServerPlayer sp : this.serverPlayers) {
+            sp.sendSystemMessage(net.minecraft.network.chat.Component.literal("§8=== [ Résumé de la Partie ] ==="));
             for (String event : this.gameHistory) {
-                sp.sendSystemMessage(Component.literal("§7- " + event));
+                sp.sendSystemMessage(net.minecraft.network.chat.Component.literal("§7- " + event));
             }
-            sp.sendSystemMessage(Component.literal("§8=========================="));
+            sp.sendSystemMessage(net.minecraft.network.chat.Component.literal("§8=========================="));
         }
     }
 }

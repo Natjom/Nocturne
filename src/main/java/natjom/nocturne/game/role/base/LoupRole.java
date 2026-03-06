@@ -6,10 +6,13 @@ import natjom.nocturne.gui.MenuHelper;
 import natjom.nocturne.util.MenuIcons;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class LoupRole extends Role {
 
@@ -33,9 +36,10 @@ public class LoupRole extends Role {
 
     @Override
     public void onWakeUp(ServerPlayer player, GameSession session) {
-        long wolfCount = session.getServerPlayers().stream()
-                .filter(p -> session.getBoard().getInitialRole(p.getUUID()) instanceof LoupRole)
-                .count();
+        Stream<ServerPlayer> wolfPack = session.getServerPlayers().stream()
+                .filter(p -> session.getBoard().getInitialRole(p.getUUID()) instanceof LoupRole);
+
+        long wolfCount = wolfPack.count();
 
         if (wolfCount == 1) {
             player.sendSystemMessage(Component.literal("§c[Nuit] Tu te réveilles seul. Choisis une carte du centre à regarder :"));
@@ -57,7 +61,8 @@ public class LoupRole extends Role {
             });
 
         } else {
-            player.sendSystemMessage(Component.literal("§c[Nuit] Tu te réveilles avec tes alliés Loups. Vous vous regardez silencieusement."));
+            List<String> wolfNames = wolfPack.map(Player::getPlainTextName).collect(Collectors.toList());
+            player.sendSystemMessage(Component.literal("§cLes autres Loups sont : " + String.join(", ", wolfNames)));
         }
     }
 

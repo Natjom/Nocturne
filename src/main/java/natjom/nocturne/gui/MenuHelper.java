@@ -93,6 +93,7 @@ public class MenuHelper {
 
             if (count > 0) {
                 icon.setCount(count);
+                icon.set(net.minecraft.core.component.DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true);
             }
 
             icon.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, Component.literal("§e" + role.getDisplayName().getString() + " §7(Actuel : §b" + count + "§7)"));
