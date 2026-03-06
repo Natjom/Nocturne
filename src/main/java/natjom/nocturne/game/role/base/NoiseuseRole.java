@@ -20,12 +20,12 @@ public class NoiseuseRole extends Role {
 
     @Override
     public int getNightOrder() {
-        return 50;
+        return 29;
     }
 
     @Override
     public String getSkinTexture() {
-        return "";
+        return "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOTg5MmQ2N2VhODRkNTJhNTQxMjU1OGM3YzMxZmQzNGYzNmM3M2Y2OThjNWY0MjRhZGE1ZDg3MzJhNjMyNWI1MyJ9fX0=";
     }
 
     @Override
