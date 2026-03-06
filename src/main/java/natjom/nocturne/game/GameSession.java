@@ -80,6 +80,13 @@ public class GameSession {
             sp.sendSystemMessage(Component.literal("§6Le jour se lève sur le village ! Il est temps de débattre..."));
             this.dayBossBar.addPlayer(sp);
             sp.playSound(net.minecraft.sounds.SoundEvents.PLAYER_LEVELUP, 1.0F, 1.0F);
+
+            for (UUID shieldedId : this.board.getShieldedCards()) {
+                ServerPlayer shieldedPlayer = sp.level().getServer().getPlayerList().getPlayer(shieldedId);
+                if (shieldedPlayer != null) {
+                    sp.sendSystemMessage(Component.literal("§2Un jeton Bouclier a été trouvé sur la carte de " + shieldedPlayer.getPlainTextName() + " !"));
+                }
+            }
         }
     }
 
