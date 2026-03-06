@@ -29,6 +29,9 @@ public class SosieRole extends Role {
     }
 
     @Override
+    public int getActionDuration() { return 280; }
+
+    @Override
     public boolean hasNightAction() {
         return true;
     }

@@ -19,6 +19,9 @@ public class SbireRole extends Role {
     public String getSkinTexture() { return "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjVhOWQ3NmMwY2NlNjhhNTNhNGJiNDUwMmU0YzUzYWE2OTFjZTZkMmExYzI3YzZhZTY4MGEwZTdjZDUzY2Y5ZSJ9fX0="; }
 
     @Override
+    public int getActionDuration() { return 60; }
+
+        @Override
     public boolean hasNightAction() { return true; }
 
     @Override

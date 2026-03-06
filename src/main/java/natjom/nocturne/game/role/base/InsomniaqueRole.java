@@ -18,6 +18,9 @@ public class InsomniaqueRole extends Role {
     }
 
     @Override
+    public int getActionDuration() { return 60; }
+
+    @Override
     public String getSkinTexture() {
         return "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODU2NjdjMzU1MmZhNmY4OGZkYjc1MDNjMjhjZDE1YTA3MDE1Y2JjNzA0ZmMzMTk4YTQ4ZDE5YjU5ZGFmNjUyOSJ9fX0=";
     }

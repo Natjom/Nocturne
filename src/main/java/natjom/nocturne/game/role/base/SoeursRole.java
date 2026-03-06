@@ -18,6 +18,9 @@ public class SoeursRole extends Role {
     public String getSkinTexture() { return "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvN2I3MzhhZDdmZmE3MTMyODc2ZjI2NmM0YzZlNDhlZTQwMDlmNmM4ZmM0MDczZDJiOGM5ZTU0ZTllNzU2MmZlIn19fQ=="; }
 
     @Override
+    public int getActionDuration() { return 60; }
+
+    @Override
     public boolean hasNightAction() { return true; }
 
     @Override
