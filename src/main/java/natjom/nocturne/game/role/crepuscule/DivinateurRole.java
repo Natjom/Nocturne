@@ -18,7 +18,7 @@ public class DivinateurRole extends Role {
 
     @Override
     public Component getDisplayName() {
-        return Component.literal("§bDivinateur");
+        return Component.literal("§aDivinateur");
     }
 
     @Override

@@ -67,6 +67,9 @@ public class NocturneRegistries {
     public static final DeferredHolder<Role, Role> APPRENTIE_VOYANTE =
             ROLES.register("apprentie_voyante", ApprentieVoyanteRole::new);
 
+    public static final DeferredHolder<Role, Role> EXORCISTE =
+            ROLES.register("exorciste", ExorcisteRole::new);
+
     public static final DeferredHolder<Role, Role> VOLEUR =
             ROLES.register("voleur", VoleurRole::new);
 
