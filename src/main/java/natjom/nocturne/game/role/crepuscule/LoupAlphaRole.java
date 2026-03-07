@@ -55,6 +55,7 @@ public class LoupAlphaRole extends LoupRole {
 
             player.sendSystemMessage(Component.literal("§cTu as transformé " + target.getPlainTextName() + " en Loup."));
             session.addHistory("Le Loup Alpha (" + player.getPlainTextName() + ") a infecté " + target.getPlainTextName() + ".");
+            session.getBoard().addPlayerAction(player.getUUID());
         });
     }
 }

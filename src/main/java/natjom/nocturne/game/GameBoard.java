@@ -10,6 +10,7 @@ public class GameBoard {
     private final List<Role> centerCards = new ArrayList<>();
     private final Set<UUID> shieldedCards = new HashSet<>();
     private final Set<UUID> revealedCards = new HashSet<>();
+    private final Set<UUID> playersWhoActed = new HashSet<>();
 
     public void setup(List<UUID> players, List<Role> deck) {
         Collections.shuffle(deck);
@@ -27,6 +28,7 @@ public class GameBoard {
         initialRoles.clear();
         shieldedCards.clear();
         revealedCards.clear();
+        playersWhoActed.clear();
         initialRoles.putAll(currentRoles);
     }
 
@@ -83,5 +85,9 @@ public class GameBoard {
     public void addRevealedCard(UUID playerId) { this.revealedCards.add(playerId); }
 
     public Set<UUID> getRevealedCards() { return this.revealedCards; }
+
+    public void addPlayerAction(UUID playerId) { this.playersWhoActed.add(playerId); }
+
+    public Set<UUID> getPlayersWhoActed() { return this.playersWhoActed; }
 
 }

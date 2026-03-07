@@ -45,5 +45,6 @@ public class InsomniaqueRole extends Role {
         player.sendSystemMessage(Component.literal("§dTu es actuellement : §l" + currentRole.getDisplayName().getString()));
 
         session.addHistory("L'Insomniaque (" + player.getPlainTextName() + ") s'est regardé et a vu : " + currentRole.getDisplayName().getString() + ".");
+        session.getBoard().addPlayerAction(player.getUUID());
     }
 }

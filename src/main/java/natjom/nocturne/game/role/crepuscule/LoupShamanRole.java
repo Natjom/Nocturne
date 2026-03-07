@@ -54,6 +54,7 @@ public class LoupShamanRole extends LoupRole {
 
             player.sendSystemMessage(Component.literal("§dLa carte de " + target.getPlainTextName() + " est : §l" + seenRole.getDisplayName().getString()));
             session.addHistory("Le Loup Shaman (" + player.getPlainTextName() + ") a regardé la carte de " + target.getPlainTextName() + ".");
+            session.getBoard().addPlayerAction(player.getUUID());
         });
     }
 }

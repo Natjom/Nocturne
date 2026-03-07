@@ -56,6 +56,7 @@ public class LoupRole extends Role {
                     player.sendSystemMessage(Component.literal("§dC'est un(e) : §l" + seenRole.getDisplayName().getString()));
 
                     session.addHistory("Le Loup (" + player.getPlainTextName() + ") a regardé le Centre " + (index + 1) + " (" + seenRole.getDisplayName().getString() + ").");
+                    session.getBoard().addPlayerAction(player.getUUID());
                 }
             });
 

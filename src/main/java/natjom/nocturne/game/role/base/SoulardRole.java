@@ -55,6 +55,7 @@ public class SoulardRole extends Role {
             player.sendSystemMessage(Component.literal("§dTu as échangé ta carte avec la carte du centre n°" + (index + 1) + ". Tu ne sais pas ce que tu es devenu !"));
 
             session.addHistory("Le Soûlard (" + player.getPlainTextName() + ") a échangé sa carte avec le centre " + (index + 1) + ".");
+            session.getBoard().addPlayerAction(player.getUUID());
         });
     }
 }

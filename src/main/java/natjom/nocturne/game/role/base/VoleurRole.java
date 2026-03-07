@@ -65,6 +65,7 @@ public class VoleurRole extends Role {
             player.sendSystemMessage(Component.literal("§dTu es maintenant : §l" + stolenRole.getDisplayName().getString()));
 
             session.addHistory("Le Voleur (" + player.getPlainTextName() + ") a volé la carte de " + target.getPlainTextName() + " (" + stolenRole.getDisplayName().getString() + ").");
+            session.getBoard().addPlayerAction(player.getUUID());
         });
     }
 }

@@ -72,6 +72,7 @@ public class SorciereRole extends Role {
                 }
 
                 session.addHistory("La Sorcière (" + player.getPlainTextName() + ") a regardé le centre " + (centerIndex + 1) + " et l'a donné à " + target.getPlainTextName() + ".");
+                session.getBoard().addPlayerAction(player.getUUID());
             });
         });
     }

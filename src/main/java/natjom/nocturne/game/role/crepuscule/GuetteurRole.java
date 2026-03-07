@@ -50,6 +50,7 @@ public class GuetteurRole extends Role {
             session.getBoard().addShield(target.getUUID());
             player.sendSystemMessage(Component.literal("§aTu as placé ton jeton bouclier sur la carte de " + target.getPlainTextName() + "."));
             session.addHistory("Le Guetteur (" + player.getPlainTextName() + ") a protégé la carte de " + target.getPlainTextName() + ".");
+            session.getBoard().addPlayerAction(player.getUUID());
         });
     }
 

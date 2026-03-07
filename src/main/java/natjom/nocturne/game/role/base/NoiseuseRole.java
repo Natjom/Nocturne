@@ -73,6 +73,7 @@ public class NoiseuseRole extends Role {
 
             player.sendSystemMessage(Component.literal("§dTu as échangé les cartes de " + firstTarget.getPlainTextName() + " et " + secondTarget.getPlainTextName() + "."));
             session.addHistory("La Noiseuse (" + player.getPlainTextName() + ") a échangé " + firstTarget.getPlainTextName() + " et " + secondTarget.getPlainTextName() + ".");
+            session.getBoard().addPlayerAction(player.getUUID());
         });
     }
 }

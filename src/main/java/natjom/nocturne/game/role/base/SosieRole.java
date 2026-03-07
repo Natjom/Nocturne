@@ -59,7 +59,7 @@ public class SosieRole extends Role {
             player.sendSystemMessage(Component.literal("§dTu es maintenant : §l" + copiedRole.getDisplayName().getString()));
 
             session.addHistory("Le Sosie (" + player.getPlainTextName() + ") a copié " + target.getPlainTextName() + " (" + copiedRole.getDisplayName().getString() + ").");
-
+            session.getBoard().addPlayerAction(player.getUUID());
 
 
             if (copiedRole.hasNightAction() && copiedRole.getNightOrder() > this.getNightOrder()) {

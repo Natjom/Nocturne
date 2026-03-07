@@ -67,6 +67,7 @@ public class DivinateurRole extends Role {
                 player.sendSystemMessage(Component.literal("§8C'est un rôle hostile (Loup ou Tanneur). La carte restera cachée."));
                 session.addHistory("Le Divinateur (" + player.getPlainTextName() + ") a regardé la carte de " + target.getPlainTextName() + " (" + seenRole.getDisplayName().getString() + ") mais elle reste secrète.");
             }
+            session.getBoard().addPlayerAction(player.getUUID());
         });
     }
 }
