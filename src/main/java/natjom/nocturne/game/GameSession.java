@@ -32,6 +32,7 @@ public class GameSession {
     private final List<UUID> eliminatedPlayers = new ArrayList<>();
     private boolean isWaitingForReveal = false;
     private final Set<UUID> revealedPlayers = new HashSet<>();
+    private net.minecraft.world.scores.Objective compoObjective;
 
     public GameSession(List<ServerPlayer> serverPlayers, UUID gameMaster) {
         this.serverPlayers = serverPlayers;
@@ -296,6 +297,12 @@ public class GameSession {
             sp.sendSystemMessage(Component.literal("§d" + player.getPlainTextName() + " révèle son rôle : §l" + finalRole.getDisplayName().getString()));
             sp.playSound(SoundEvents.EXPERIENCE_ORB_PICKUP, 1.0F, 1.0F);
         }
+
+        if (this.compoObjective != null && !this.serverPlayers.isEmpty()) {
+            net.minecraft.world.scores.Scoreboard scoreboard = this.serverPlayers.get(0).level().getServer().getScoreboard();
+            scoreboard.removeObjective(this.compoObjective);
+            this.compoObjective = null;
+        }
     }
 
     public void revealWinnersAndHistory() {
@@ -370,6 +377,54 @@ public class GameSession {
         }
 
         this.nightCycle = new NightCycleManager(this);
+
+
+        net.minecraft.server.MinecraftServer server = this.serverPlayers.get(0).level().getServer();
+        net.minecraft.world.scores.Scoreboard scoreboard = server.getScoreboard();
+
+        net.minecraft.world.scores.Objective oldObj = scoreboard.getObjective("nocturne_compo");
+        if (oldObj != null) {
+            scoreboard.removeObjective(oldObj);
+        }
+
+        this.compoObjective = scoreboard.addObjective(
+                "nocturne_compo",
+                net.minecraft.world.scores.criteria.ObjectiveCriteria.DUMMY,
+                Component.literal("§6§lRôles en Jeu"),
+                net.minecraft.world.scores.criteria.ObjectiveCriteria.RenderType.INTEGER,
+                false,
+                null
+        );
+
+        scoreboard.setDisplayObjective(net.minecraft.world.scores.DisplaySlot.SIDEBAR, this.compoObjective);
+
+        List<Map.Entry<Role, Integer>> activeRoles = new ArrayList<>();
+        for (Map.Entry<Role, Integer> entry : natjom.nocturne.game.CompositionManager.COMPOSITION.entrySet()) {
+            if (entry.getValue() > 0) {
+                activeRoles.add(entry);
+            }
+        }
+
+        activeRoles.sort((e1, e2) -> {
+            int o1 = e1.getKey().getNightOrder();
+            int o2 = e2.getKey().getNightOrder();
+            if (o1 == 0) o1 = 999;
+            if (o2 == 0) o2 = 999;
+            return Integer.compare(o1, o2);
+        });
+
+        int score = activeRoles.size();
+        for (Map.Entry<Role, Integer> entry : activeRoles) {
+            Role role = entry.getKey();
+            int count = entry.getValue();
+
+            String orderStr = role.getNightOrder() > 0 ? "§8[" + role.getNightOrder() + "] §r" : "§8[-] §r";
+            String countStr = count > 1 ? " §ex" + count : "";
+            String line = orderStr + role.getDisplayName().getString() + countStr;
+
+            scoreboard.getOrCreatePlayerScore(net.minecraft.world.scores.ScoreHolder.forNameOnly(line), this.compoObjective).set(score--);
+        }
+
     }
 
     public void stop() {
@@ -392,6 +447,12 @@ public class GameSession {
                     sp.removeEffect(net.minecraft.world.effect.MobEffects.WEAKNESS);
                 });
             }
+        }
+
+        if (this.compoObjective != null && !this.serverPlayers.isEmpty()) {
+            net.minecraft.world.scores.Scoreboard scoreboard = this.serverPlayers.get(0).level().getServer().getScoreboard();
+            scoreboard.removeObjective(this.compoObjective);
+            this.compoObjective = null;
         }
     }
 
