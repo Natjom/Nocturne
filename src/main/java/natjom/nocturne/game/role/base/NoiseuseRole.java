@@ -43,7 +43,7 @@ public class NoiseuseRole extends Role {
         List<ServerPlayer> validTargets = new ArrayList<>();
 
         for (ServerPlayer target : session.getServerPlayers()) {
-            if (!target.getUUID().equals(player.getUUID())) {
+            if (!target.getUUID().equals(player.getUUID()) && !session.getBoard().isShielded(target.getUUID())) {
                 options.add(MenuIcons.makePlayerHead(target, "§e"));
                 validTargets.add(target);
             }
@@ -60,7 +60,7 @@ public class NoiseuseRole extends Role {
         List<ServerPlayer> validTargets = new ArrayList<>();
 
         for (ServerPlayer target : session.getServerPlayers()) {
-            if (!target.getUUID().equals(player.getUUID()) && !target.getUUID().equals(firstTarget.getUUID())) {
+            if (!target.getUUID().equals(player.getUUID()) && !target.getUUID().equals(firstTarget.getUUID()) && !session.getBoard().isShielded(target.getUUID())) {
                 options.add(MenuIcons.makePlayerHead(target, "§e"));
                 validTargets.add(target);
             }

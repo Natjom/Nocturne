@@ -49,6 +49,12 @@ public class NocturneRegistries {
     public static final DeferredHolder<Role, Role> LOUP_REVEUR =
             ROLES.register("loup_reveur", LoupReveurRole::new);
 
+    public static final DeferredHolder<Role, Role> LOUP_ALPHA =
+            ROLES.register("loup_alpha", LoupAlphaRole::new);
+
+    public static final DeferredHolder<Role, Role> LOUP_SHAMAN =
+            ROLES.register("loup_shaman", LoupShamanRole::new);
+
     public static final DeferredHolder<Role, Role> SBIRE =
             ROLES.register("sbire", SbireRole::new);
 

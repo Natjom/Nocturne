@@ -36,11 +36,19 @@ public class NightCycleManager {
     }
 
     private void prepareOrder() {
-        List<Role> sortedRoles = this.session.getBoard().getAllRolesInGame().stream()
+        List<Role> sortedRoles = new java.util.ArrayList<>(this.session.getBoard().getAllRolesInGame().stream()
                 .filter(Role::hasNightAction)
                 .distinct()
-                .sorted(Comparator.comparingInt(Role::getNightOrder))
-                .toList();
+                .sorted(java.util.Comparator.comparingInt(Role::getNightOrder))
+                .toList());
+
+        boolean hasWolves = sortedRoles.stream().anyMatch(r -> r instanceof natjom.nocturne.game.role.base.LoupRole);
+        boolean hasBaseWolf = sortedRoles.stream().anyMatch(r -> r.getClass() == natjom.nocturne.game.role.base.LoupRole.class);
+
+        if (hasWolves && !hasBaseWolf) {
+            sortedRoles.add(new natjom.nocturne.game.role.base.LoupRole());
+            sortedRoles.sort(java.util.Comparator.comparingInt(Role::getNightOrder));
+        }
 
         this.wakeUpOrder.addAll(sortedRoles);
     }
@@ -79,7 +87,13 @@ public class NightCycleManager {
         broadcastWakeUp(currentRole);
 
         for (ServerPlayer player : session.getServerPlayers()) {
-            if (session.getBoard().getInitialRole(player.getUUID()) == currentRole) {
+            Role initialRole = session.getBoard().getInitialRole(player.getUUID());
+
+            if (currentRole.getClass() == natjom.nocturne.game.role.base.LoupRole.class) {
+                if (initialRole instanceof natjom.nocturne.game.role.base.LoupRole && !(initialRole instanceof natjom.nocturne.game.role.crepuscule.LoupReveurRole)) {
+                    currentRole.onWakeUp(player, session);
+                }
+            } else if (initialRole == currentRole) {
                 currentRole.onWakeUp(player, session);
             }
         }

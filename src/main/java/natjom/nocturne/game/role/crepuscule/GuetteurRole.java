@@ -29,6 +29,9 @@ public class GuetteurRole extends Role {
     }
 
     @Override
+    public boolean hasNightAction() { return true; }
+
+    @Override
     public void onWakeUp(ServerPlayer player, GameSession session) {
         List<ItemStack> options = new ArrayList<>();
         List<ServerPlayer> validTargets = new ArrayList<>();

@@ -35,6 +35,13 @@ public class SoulardRole extends Role {
 
     @Override
     public void onWakeUp(ServerPlayer player, GameSession session) {
+
+        if (session.getBoard().isShielded(player.getUUID())) {
+            player.sendSystemMessage(Component.literal("§c[Nuit] Tu essaies de te lever... mais un bouclier protège ta carte ! Tu ne peux rien faire."));
+            session.addHistory("Le Soûlard (" + player.getPlainTextName() + ") n'a pas pu échanger sa carte car elle était protégée.");
+            return;
+        }
+
         List<ItemStack> options = new ArrayList<>();
 
         for (int i = 0; i < 3; i++) {

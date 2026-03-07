@@ -32,6 +32,13 @@ public class InsomniaqueRole extends Role {
 
     @Override
     public void onWakeUp(ServerPlayer player, GameSession session) {
+
+        if (session.getBoard().isShielded(player.getUUID())) {
+            player.sendSystemMessage(Component.literal("§c[Nuit] Tu essaies de te lever... mais un bouclier protège ta carte ! Tu ne peux rien faire."));
+            session.addHistory("L'Insomniaque (" + player.getPlainTextName() + ") n'a pas pu consulter sa carte car elle était protégée.");
+            return;
+        }
+
         Role currentRole = session.getBoard().getCurrentRole(player.getUUID());
 
         player.sendSystemMessage(Component.literal("§c[Nuit] Impossible de dormir... Tu regardes ta propre carte :"));

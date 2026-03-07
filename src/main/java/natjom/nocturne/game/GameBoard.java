@@ -48,16 +48,16 @@ public class GameBoard {
     }
 
     public void swapPlayerRoles(UUID player1, UUID player2) {
-        natjom.nocturne.game.role.Role role1 = this.getCurrentRole(player1);
-        natjom.nocturne.game.role.Role role2 = this.getCurrentRole(player2);
+        Role role1 = this.getCurrentRole(player1);
+        Role role2 = this.getCurrentRole(player2);
 
         this.currentRoles.put(player1, role2);
         this.currentRoles.put(player2, role1);
     }
 
     public void swapPlayerWithCenter(UUID player, int centerIndex) {
-        natjom.nocturne.game.role.Role playerRole = this.getCurrentRole(player);
-        natjom.nocturne.game.role.Role centerRole = this.getCenterCard(centerIndex);
+        Role playerRole = this.getCurrentRole(player);
+        Role centerRole = this.getCenterCard(centerIndex);
 
         this.currentRoles.put(player, centerRole);
         this.centerCards.set(centerIndex, playerRole);
@@ -73,6 +73,10 @@ public class GameBoard {
 
     public Set<UUID> getShieldedCards() {
         return this.shieldedCards;
+    }
+
+    public void setCurrentRole(UUID playerId, Role newRole) {
+        this.currentRoles.put(playerId, newRole);
     }
 
 }

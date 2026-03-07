@@ -18,7 +18,7 @@ public class LoupRole extends Role {
 
     @Override
     public Component getDisplayName() {
-        return Component.literal("Loup");
+        return Component.literal("§cLoup");
     }
 
     @Override
@@ -62,7 +62,13 @@ public class LoupRole extends Role {
         } else {
             List<String> wolfNames = wolfPack.stream()
                     .filter(p -> !p.getUUID().equals(player.getUUID()))
-                    .map(net.minecraft.world.entity.player.Player::getPlainTextName)
+                    .map(p -> {
+                        Role r = session.getBoard().getInitialRole(p.getUUID());
+                        if (r instanceof natjom.nocturne.game.role.crepuscule.LoupReveurRole) {
+                            return p.getPlainTextName() + " §7(Rêveur)§c";
+                        }
+                        return p.getPlainTextName();
+                    })
                     .toList();
 
             player.sendSystemMessage(Component.literal("§cLes autres Loups sont : " + String.join(", ", wolfNames)));

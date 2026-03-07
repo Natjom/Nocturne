@@ -45,7 +45,7 @@ public class CompositionManager {
 
         int current = COMPOSITION.getOrDefault(role, 0);
 
-        if (role instanceof VillageoisRole || role instanceof LoupRole) {
+        if (role.getClass() == VillageoisRole.class || role.getClass() == LoupRole.class) {
             COMPOSITION.put(role, (current + 1) % 4);
         } else if (role instanceof SoeursRole) {
             COMPOSITION.put(role, current == 0 ? 2 : 0);
