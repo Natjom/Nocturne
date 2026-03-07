@@ -27,5 +27,5 @@ public class LoupReveurRole extends LoupRole {
     @Override
     public boolean hasNightAction() {
         return false;
-    }
+    } // TODO - faire qu'en fait si pck dcp il peut pas être identifié comme LG rêveur là
 }
