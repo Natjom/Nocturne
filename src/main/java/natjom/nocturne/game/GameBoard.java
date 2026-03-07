@@ -11,6 +11,7 @@ public class GameBoard {
     private final Set<UUID> shieldedCards = new HashSet<>();
     private final Set<UUID> revealedCards = new HashSet<>();
     private final Set<UUID> playersWhoActed = new HashSet<>();
+    private final List<UUID> circleOrder = new ArrayList<>();
 
     public void setup(List<UUID> players, List<Role> deck) {
         Collections.shuffle(deck);
@@ -21,6 +22,8 @@ public class GameBoard {
 
         for (UUID player : players) {
             Role assignedRole = deck.removeFirst();
+            circleOrder.clear();
+            circleOrder.addAll(players);
             initialRoles.put(player, assignedRole);
             currentRoles.put(player, assignedRole);
         }
@@ -89,5 +92,7 @@ public class GameBoard {
     public void addPlayerAction(UUID playerId) { this.playersWhoActed.add(playerId); }
 
     public Set<UUID> getPlayersWhoActed() { return this.playersWhoActed; }
+
+    public List<UUID> getCircleOrder() { return this.circleOrder; }
 
 }

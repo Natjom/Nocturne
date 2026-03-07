@@ -347,6 +347,21 @@ public class GameSession {
 
         this.board.setup(this.players, deck);
 
+
+        List<String> circleNames = new ArrayList<>();
+        for (UUID id : this.board.getCircleOrder()) {
+            ServerPlayer p = this.serverPlayers.stream().filter(sp -> sp.getUUID().equals(id)).findFirst().orElse(null);
+            if (p != null) circleNames.add(p.getPlainTextName());
+        }
+        String circleString = String.join(" §8> §e", circleNames) + " §8> §e" + circleNames.get(0); // Boucle visuelle
+
+        for (ServerPlayer sp : this.serverPlayers) {
+            if (sp.getUUID().equals(this.gameMaster)) {
+                sp.sendSystemMessage(Component.literal("§7[Info] Ordre du cercle (Sens Horaire) :"));
+                sp.sendSystemMessage(Component.literal("§e" + circleString));
+            }
+        }
+
         this.addHistory("§e--- Distribution Initiale ---");
         for (ServerPlayer sp : this.serverPlayers) {
             natjom.nocturne.game.role.Role initialRole = this.board.getInitialRole(sp.getUUID());

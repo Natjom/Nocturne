@@ -10,6 +10,7 @@ import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class LeTomRole extends Role {
 
@@ -36,39 +37,43 @@ public class LeTomRole extends Role {
     @Override
     public void onWakeUp(ServerPlayer player, GameSession session) {
         List<ItemStack> options = new ArrayList<>();
-        options.add(MenuIcons.makeChoiceCard("Vers la Gauche"));
-        options.add(MenuIcons.makeChoiceCard("Vers la Droite"));
+        options.add(MenuIcons.makeChoiceCard("Sens Horaire"));
+        options.add(MenuIcons.makeChoiceCard("Sens Antihoraire"));
 
         player.sendSystemMessage(Component.literal("§c[Nuit] Dans quel sens veux-tu décaler les cartes du village ?"));
 
         MenuHelper.openChoiceMenu(player, "§8Décaler les cartes", options, index -> {
-            boolean toRight = (index == 1);
+            boolean clockwise = (index == 0);
 
-            List<ServerPlayer> targets = session.getServerPlayers().stream()
-                    .filter(p -> !p.getUUID().equals(player.getUUID()))
-                    .filter(p -> !session.getBoard().isShielded(p.getUUID()))
-                    .toList();
+            List<UUID> fullCircle = session.getBoard().getCircleOrder();
+            List<UUID> targets = new ArrayList<>();
+
+            for (UUID id : fullCircle) {
+                if (!id.equals(player.getUUID()) && !session.getBoard().isShielded(id)) {
+                    targets.add(id);
+                }
+            }
 
             if (targets.size() > 1) {
                 List<Role> currentRoles = new ArrayList<>();
-                for (ServerPlayer t : targets) {
-                    currentRoles.add(session.getBoard().getCurrentRole(t.getUUID()));
+                for (UUID t : targets) {
+                    currentRoles.add(session.getBoard().getCurrentRole(t));
                 }
 
                 for (int i = 0; i < targets.size(); i++) {
                     int newIndex;
-                    if (toRight) {
+                    if (clockwise) {
                         newIndex = (i - 1 + targets.size()) % targets.size();
                     } else {
                         newIndex = (i + 1) % targets.size();
                     }
-                    session.getBoard().setCurrentRole(targets.get(i).getUUID(), currentRoles.get(newIndex));
+                    session.getBoard().setCurrentRole(targets.get(i), currentRoles.get(newIndex));
                 }
             }
 
-            String sens = toRight ? "la droite" : "la gauche";
-            player.sendSystemMessage(Component.literal("§dTu as décalé les cartes non protégées vers " + sens + "."));
-            session.addHistory("Le Tom (" + player.getPlainTextName() + ") a décalé toutes les cartes vers " + sens + ".");
+            String sens = clockwise ? "Sens Horaire" : "Sens Antihoraire";
+            player.sendSystemMessage(Component.literal("§dTu as décalé les cartes non protégées en " + sens + "."));
+            session.addHistory("Le Tom (" + player.getPlainTextName() + ") a décalé toutes les cartes en " + sens + ".");
             session.getBoard().addPlayerAction(player.getUUID());
         });
     }

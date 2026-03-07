@@ -18,7 +18,7 @@ public class SosieRole extends Role {
 
     @Override
     public Component getDisplayName() {
-        return Component.literal("§2Sosie");
+        return Component.literal("§7Sosie");
     }
 
     @Override
