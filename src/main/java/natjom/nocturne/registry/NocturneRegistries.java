@@ -67,6 +67,9 @@ public class NocturneRegistries {
     public static final DeferredHolder<Role, Role> VOLEUR =
             ROLES.register("voleur", VoleurRole::new);
 
+    public static final DeferredHolder<Role, Role> SORICERE =
+            ROLES.register("sorciere", SorciereRole::new);
+
     public static final DeferredHolder<Role, Role> NOISEUSE =
             ROLES.register("noiseuse", NoiseuseRole::new);
 
@@ -75,5 +78,9 @@ public class NocturneRegistries {
 
     public static final DeferredHolder<Role, Role> INSOMNIAQUE =
             ROLES.register("insomniaque", InsomniaqueRole::new);
+
+    public static final DeferredHolder<Role, Role> DIVINATEUR =
+            ROLES.register("divinateur", DivinateurRole::new);
+
 
 }

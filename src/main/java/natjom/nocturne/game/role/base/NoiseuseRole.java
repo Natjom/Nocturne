@@ -15,7 +15,7 @@ public class NoiseuseRole extends Role {
 
     @Override
     public Component getDisplayName() {
-        return Component.literal("Noiseuse");
+        return Component.literal("§aNoiseuse");
     }
 
     @Override

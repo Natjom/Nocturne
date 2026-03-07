@@ -9,7 +9,7 @@ import java.util.List;
 public class SoeursRole extends Role {
 
     @Override
-    public Component getDisplayName() { return Component.literal("Soeur"); }
+    public Component getDisplayName() { return Component.literal("§aSoeur"); }
 
     @Override
     public int getNightOrder() { return 19; }

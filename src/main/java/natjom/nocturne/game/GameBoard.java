@@ -9,6 +9,7 @@ public class GameBoard {
     private final Map<UUID, Role> currentRoles = new HashMap<>();
     private final List<Role> centerCards = new ArrayList<>();
     private final Set<UUID> shieldedCards = new HashSet<>();
+    private final Set<UUID> revealedCards = new HashSet<>();
 
     public void setup(List<UUID> players, List<Role> deck) {
         Collections.shuffle(deck);
@@ -24,6 +25,8 @@ public class GameBoard {
         }
 
         initialRoles.clear();
+        shieldedCards.clear();
+        revealedCards.clear();
         initialRoles.putAll(currentRoles);
     }
 
@@ -34,9 +37,7 @@ public class GameBoard {
         return allRoles;
     }
 
-    public Role getCurrentRole(UUID player) {
-        return currentRoles.get(player);
-    }
+    public Role getCurrentRole(UUID player) { return currentRoles.get(player); }
 
     public Role getInitialRole(UUID player) { return initialRoles.get(player); }
 
@@ -78,5 +79,9 @@ public class GameBoard {
     public void setCurrentRole(UUID playerId, Role newRole) {
         this.currentRoles.put(playerId, newRole);
     }
+
+    public void addRevealedCard(UUID playerId) { this.revealedCards.add(playerId); }
+
+    public Set<UUID> getRevealedCards() { return this.revealedCards; }
 
 }

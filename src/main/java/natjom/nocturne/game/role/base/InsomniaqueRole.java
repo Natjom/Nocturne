@@ -9,7 +9,7 @@ public class InsomniaqueRole extends Role {
 
     @Override
     public Component getDisplayName() {
-        return Component.literal("Insomniaque");
+        return Component.literal("§aInsomniaque");
     }
 
     @Override

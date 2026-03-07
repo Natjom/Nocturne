@@ -15,7 +15,7 @@ public class GuetteurRole extends Role {
 
     @Override
     public Component getDisplayName() {
-        return Component.literal("Guetteur");
+        return Component.literal("§aGuetteur");
     }
 
     @Override

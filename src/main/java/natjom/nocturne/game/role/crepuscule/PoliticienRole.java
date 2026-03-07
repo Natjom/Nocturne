@@ -7,7 +7,7 @@ public class PoliticienRole extends Role {
 
     @Override
     public Component getDisplayName() {
-        return Component.literal("Politicien");
+        return Component.literal("§aPoliticien");
     }
 
     @Override

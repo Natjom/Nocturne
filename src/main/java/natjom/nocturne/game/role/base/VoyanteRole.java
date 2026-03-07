@@ -17,7 +17,7 @@ public class VoyanteRole extends Role {
 
     @Override
     public Component getDisplayName() {
-        return Component.literal("Voyante");
+        return Component.literal("§aVoyante");
     }
 
     @Override

@@ -26,7 +26,7 @@ public class LoupAlphaRole extends LoupRole {
 
     @Override
     public String getSkinTexture() {
-        return "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZjdlMThlN2JjZDM4ZDUxOWNlNDk5YmJkNDBlMzJjYmVjN2E1OWM1OTQyNDlhYTViNDE3ZDUzZGVhOWUifX19";
+        return "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYTMxYTg0MGM4ZDkzMTUzNWRhZjkzMGFlMzMyMDVkZjQwZmRlZjM3MTUwNTcyZTI4OTVmZTQ5YTBjODViODNjMiJ9fX0=";
     }
 
     @Override

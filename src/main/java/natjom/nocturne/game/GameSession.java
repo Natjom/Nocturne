@@ -87,6 +87,14 @@ public class GameSession {
                     sp.sendSystemMessage(Component.literal("§2Un jeton Bouclier a été trouvé sur la carte de " + shieldedPlayer.getPlainTextName() + " !"));
                 }
             }
+
+            for (UUID revealedId : this.board.getRevealedCards()) {
+                ServerPlayer revealedPlayer = sp.level().getServer().getPlayerList().getPlayer(revealedId);
+                if (revealedPlayer != null) {
+                    natjom.nocturne.game.role.Role r = this.board.getCurrentRole(revealedId);
+                    sp.sendSystemMessage(Component.literal("§bLa carte de " + revealedPlayer.getPlainTextName() + " a été retournée face visible ! C'est un(e) : §l" + r.getDisplayName().getString()));
+                }
+            }
         }
     }
 

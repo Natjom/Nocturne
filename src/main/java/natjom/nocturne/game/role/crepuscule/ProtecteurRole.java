@@ -7,7 +7,7 @@ public class ProtecteurRole extends Role {
 
     @Override
     public Component getDisplayName() {
-        return Component.literal("Protecteur");
+        return Component.literal("§aProtecteur");
     }
 
     @Override

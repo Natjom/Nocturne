@@ -7,7 +7,7 @@ public class VillageoisRole extends Role {
 
     @Override
     public Component getDisplayName() {
-        return Component.literal("Villageois");
+        return Component.literal("§aVillageois");
     }
 
     @Override

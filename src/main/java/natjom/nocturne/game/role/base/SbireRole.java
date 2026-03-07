@@ -10,7 +10,7 @@ import java.util.UUID;
 public class SbireRole extends Role {
 
     @Override
-    public Component getDisplayName() { return Component.literal("Sbire"); }
+    public Component getDisplayName() { return Component.literal("§cSbire"); }
 
     @Override
     public int getNightOrder() { return 17; }
