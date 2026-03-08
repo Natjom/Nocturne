@@ -10,8 +10,6 @@ import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
-import javax.swing.*;
-
 public class NocturneRegistries {
 
     public static final ResourceKey<Registry<Role>> ROLE_REGISTRY_KEY =
@@ -73,7 +71,7 @@ public class NocturneRegistries {
     public static final DeferredHolder<Role, Role> VOLEUR =
             ROLES.register("voleur", VoleurRole::new);
 
-    public static final DeferredHolder<Role, Role> SORICERE =
+    public static final DeferredHolder<Role, Role> SORCIERE =
             ROLES.register("sorciere", SorciereRole::new);
 
     public static final DeferredHolder<Role, Role> NOISEUSE =
