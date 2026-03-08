@@ -1,6 +1,7 @@
 package natjom.nocturne.game;
 
 import natjom.nocturne.game.role.Role;
+import natjom.nocturne.game.role.crepuscule.Artefact;
 
 import java.util.*;
 
@@ -12,6 +13,7 @@ public class GameBoard {
     private final Set<UUID> revealedCards = new HashSet<>();
     private final Set<UUID> playersWhoActed = new HashSet<>();
     private final List<UUID> circleOrder = new ArrayList<>();
+    private final Map<UUID, Artefact> playerArtifacts = new HashMap<>();
 
     public void setup(List<UUID> players, List<Role> deck) {
         Collections.shuffle(deck);
@@ -32,6 +34,7 @@ public class GameBoard {
         shieldedCards.clear();
         revealedCards.clear();
         playersWhoActed.clear();
+        playerArtifacts.clear();
         initialRoles.putAll(currentRoles);
     }
 
@@ -94,5 +97,14 @@ public class GameBoard {
     public Set<UUID> getPlayersWhoActed() { return this.playersWhoActed; }
 
     public List<UUID> getCircleOrder() { return this.circleOrder; }
+
+    public void setArtifact(UUID player, Artefact artifact) { this.playerArtifacts.put(player, artifact); }
+
+    public Artefact getArtifact(UUID player) { return this.playerArtifacts.get(player); }
+
+    public boolean hasPowerCancelled(UUID player) {
+        Artefact artefact = this.getArtifact(player);
+        return artefact != null && artefact.isCancelsPowers();
+    }
 
 }

@@ -94,5 +94,6 @@ public class NocturneRegistries {
     public static final DeferredHolder<Role, Role> DIVINATEUR =
             ROLES.register("divinateur", DivinateurRole::new);
 
-
+    public static final DeferredHolder<Role, Role> CONSERVATEUR =
+            ROLES.register("conservateur", ConservateurRole::new);
 }

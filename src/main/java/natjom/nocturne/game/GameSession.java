@@ -3,6 +3,7 @@ package natjom.nocturne.game;
 import natjom.nocturne.game.role.base.ChasseurRole;
 import natjom.nocturne.game.role.Role;
 import natjom.nocturne.game.role.base.SosieRole;
+import natjom.nocturne.game.role.crepuscule.Artefact;
 import natjom.nocturne.game.role.crepuscule.PoliticienRole;
 import natjom.nocturne.game.role.crepuscule.ProtecteurRole;
 import net.minecraft.network.chat.Component;
@@ -92,8 +93,22 @@ public class GameSession {
             for (UUID revealedId : this.board.getRevealedCards()) {
                 ServerPlayer revealedPlayer = sp.level().getServer().getPlayerList().getPlayer(revealedId);
                 if (revealedPlayer != null) {
-                    natjom.nocturne.game.role.Role r = this.board.getCurrentRole(revealedId);
+                    Role r = this.board.getCurrentRole(revealedId);
                     sp.sendSystemMessage(Component.literal("§bLa carte de " + revealedPlayer.getPlainTextName() + " a été retournée face visible ! C'est un(e) : §l" + r.getDisplayName().getString()));
+                }
+            }
+
+            for (ServerPlayer target : this.serverPlayers) {
+                if (this.board.getArtifact(target.getUUID()) != null) {
+                    sp.sendSystemMessage(Component.literal("§6Un artefact mystère a été posé devant " + target.getPlainTextName() + " !"));
+                }
+            }
+
+            Artefact myArtifact = this.board.getArtifact(sp.getUUID());
+            if (myArtifact != null) {
+                sp.sendSystemMessage(Component.literal("§6§l[Artefact] §r§eLe Conservateur a glissé un objet devant toi... C'est : " + myArtifact.getDisplayName()));
+                if (myArtifact.isCancelsPowers()) {
+                    sp.sendSystemMessage(Component.literal("§cAttention : Ton pouvoir de jour est annulé et ta condition de victoire a changé !"));
                 }
             }
         }
@@ -181,6 +196,7 @@ public class GameSession {
         for (ServerPlayer sp : this.serverPlayers) {
             Role role = this.board.getCurrentRole(sp.getUUID());
 
+            if (!this.board.hasPowerCancelled(sp.getUUID())) {
             if (role instanceof PoliticienRole || (role instanceof SosieRole && ((SosieRole) role).getCopiedRole() instanceof PoliticienRole)) {
                 protectedPlayers.add(sp.getUUID());
             }
@@ -190,6 +206,7 @@ public class GameSession {
                 if (protectedByBodyguard != null) {
                     protectedPlayers.add(protectedByBodyguard);
                 }
+            }
             }
         }
 
@@ -231,7 +248,7 @@ public class GameSession {
                 boolean isHunter = deadRole instanceof ChasseurRole;
                 boolean isSosieHunter = (deadRole instanceof SosieRole) && (((SosieRole) deadRole).getCopiedRole() instanceof ChasseurRole);
 
-                if (isHunter || isSosieHunter) {
+                if ((isHunter || isSosieHunter) && !this.board.hasPowerCancelled(deadId)) {
                     UUID hunterTarget = this.votes.get(deadId);
                     if (hunterTarget != null && !eliminated.contains(hunterTarget) && !extraEliminations.contains(hunterTarget)) {
                         extraEliminations.add(hunterTarget);
@@ -315,15 +332,29 @@ public class GameSession {
 
         for (ServerPlayer sp : this.serverPlayers) {
             Role finalRole = this.board.getCurrentRole(sp.getUUID());
-            boolean won = finalRole.didWin(this, sp.getUUID(), this.eliminatedPlayers);
+            natjom.nocturne.game.role.crepuscule.Artefact artifact = this.board.getArtifact(sp.getUUID());
+
+            boolean won;
+
+            if (artifact == natjom.nocturne.game.role.crepuscule.Artefact.GRIFFE_LOUP_GAROU) {
+                won = new natjom.nocturne.game.role.base.LoupRole().didWin(this, sp.getUUID(), this.eliminatedPlayers);
+            } else if (artifact == natjom.nocturne.game.role.crepuscule.Artefact.MARQUE_VILLAGEOIS) {
+                won = new natjom.nocturne.game.role.base.VillageoisRole().didWin(this, sp.getUUID(), this.eliminatedPlayers);
+            } else if (artifact == natjom.nocturne.game.role.crepuscule.Artefact.GOURDIN_TANNEUR) {
+                won = new natjom.nocturne.game.role.base.TanneurRole().didWin(this, sp.getUUID(), this.eliminatedPlayers);
+            } else {
+                won = finalRole.didWin(this, sp.getUUID(), this.eliminatedPlayers);
+            }
+
+            String artifactInfo = artifact != null ? " §6(" + artifact.getDisplayName() + "§6)" : "";
 
             if (won) {
                 sp.sendSystemMessage(Component.literal("§a§lVICTOIRE ! §r§aTu as gagné."));
-                this.addHistory(sp.getPlainTextName() + " a GAGNÉ avec le rôle " + finalRole.getDisplayName().getString());
+                this.addHistory(sp.getPlainTextName() + " a GAGNÉ avec le rôle " + finalRole.getDisplayName().getString() + artifactInfo);
                 sp.playSound(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, 1.0F, 1.0F);
             } else {
                 sp.sendSystemMessage(Component.literal("§c§lDÉFAITE ! §r§cTu as perdu."));
-                this.addHistory(sp.getPlainTextName() + " a PERDU avec le rôle " + finalRole.getDisplayName().getString());
+                this.addHistory(sp.getPlainTextName() + " a PERDU avec le rôle " + finalRole.getDisplayName().getString() + artifactInfo);
                 sp.playSound(SoundEvents.VILLAGER_NO, 1.0F, 1.0F);
             }
         }
