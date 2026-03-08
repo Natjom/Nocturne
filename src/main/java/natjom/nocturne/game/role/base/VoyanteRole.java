@@ -17,7 +17,7 @@ public class VoyanteRole extends Role {
 
     @Override
     public Component getDisplayName() {
-        return Component.literal("Voyante");
+        return Component.literal("§aVoyante");
     }
 
     @Override
@@ -41,7 +41,7 @@ public class VoyanteRole extends Role {
         List<ServerPlayer> validTargets = new ArrayList<>();
 
         for (ServerPlayer target : session.getServerPlayers()) {
-            if (!target.getUUID().equals(player.getUUID())) {
+            if (!target.getUUID().equals(player.getUUID()) && !session.getBoard().isShielded(target.getUUID())) {
                 options.add(MenuIcons.makePlayerHead(target, "§e"));
                 validTargets.add(target);
             }
@@ -57,6 +57,7 @@ public class VoyanteRole extends Role {
                 Role seenRole = session.getBoard().getCurrentRole(target.getUUID());
                 player.sendSystemMessage(Component.literal("§dLe rôle de " + target.getPlainTextName() + " est : §l" + seenRole.getDisplayName().getString()));
                 session.addHistory("La Voyante (" + player.getPlainTextName() + ") a regardé la carte de " + target.getPlainTextName() + " (" + seenRole.getDisplayName().getString() + ").");
+                session.getBoard().addPlayerAction(player.getUUID());
             } else {
                 if (player.level().getServer() != null) {
                     player.level().getServer().execute(() -> openCenterMenu(player, session, new ArrayList<>()));
@@ -89,6 +90,7 @@ public class VoyanteRole extends Role {
                 }
             } else {
                 session.addHistory("La Voyante (" + player.getPlainTextName() + ") a regardé le centre " + (seenIndexes.get(0) + 1) + " et " + (seenIndexes.get(1) + 1) + ".");
+                session.getBoard().addPlayerAction(player.getUUID());
             }
         });
     }

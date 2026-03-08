@@ -1,10 +1,19 @@
 package natjom.nocturne.gui;
 
+import natjom.nocturne.game.CompoSet;
+import natjom.nocturne.game.CompositionManager;
+import natjom.nocturne.game.role.Role;
+import natjom.nocturne.registry.NocturneRegistries;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
+import net.minecraft.world.item.component.ResolvableProfile;
 import org.jspecify.annotations.NonNull;
 
 import java.util.List;
@@ -69,18 +78,19 @@ public class MenuHelper {
     public static void openCompoMenu(ServerPlayer player) {
         natjom.nocturne.game.CompositionManager.initDefault();
 
-        List<natjom.nocturne.game.role.Role> allRoles = new java.util.ArrayList<>();
-        natjom.nocturne.registry.NocturneRegistries.ROLES.getEntries().forEach(entry -> allRoles.add(entry.get()));
+        List<Role> allRoles = new java.util.ArrayList<>();
+        NocturneRegistries.ROLES.getEntries().forEach(entry -> allRoles.add(entry.get()));
 
         List<ItemStack> options = new java.util.ArrayList<>();
-        for (natjom.nocturne.game.role.Role role : allRoles) {
+        for (Role role : allRoles) {
             int count = natjom.nocturne.game.CompositionManager.COMPOSITION.getOrDefault(role, 0);
+            MutableComponent itemName = Component.literal("");
 
             ItemStack icon;
             if (role.getSkinTexture().isEmpty()) {
-                icon = new ItemStack(net.minecraft.world.item.Items.PAPER);
+                icon = new ItemStack(Items.PAPER);
             } else {
-                icon = new ItemStack(net.minecraft.world.item.Items.PLAYER_HEAD);
+                icon = new ItemStack(Items.PLAYER_HEAD);
 
                 com.google.common.collect.ImmutableMultimap<String, com.mojang.authlib.properties.Property> properties = com.google.common.collect.ImmutableMultimap.of(
                         "textures", new com.mojang.authlib.properties.Property("textures", role.getSkinTexture())
@@ -88,15 +98,19 @@ public class MenuHelper {
                 com.mojang.authlib.properties.PropertyMap propertyMap = new com.mojang.authlib.properties.PropertyMap(properties);
 
                 com.mojang.authlib.GameProfile profile = new com.mojang.authlib.GameProfile(java.util.UUID.randomUUID(), "RoleIcon", propertyMap);
-                icon.set(net.minecraft.core.component.DataComponents.PROFILE, net.minecraft.world.item.component.ResolvableProfile.createResolved(profile));
+                icon.set(DataComponents.PROFILE, ResolvableProfile.createResolved(profile));
             }
 
             if (count > 0) {
                 icon.setCount(count);
+                itemName.append("§a§l" + role.getDisplayName().getString() + " §2[x" + count + "]");
+            } else {
+                icon.setCount(1);
+                itemName.append("§c" + role.getDisplayName().getString() + " §8[Inactif]");
             }
 
-            icon.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, Component.literal("§e" + role.getDisplayName().getString() + " §7(Actuel : §b" + count + "§7)"));
-            icon.set(net.minecraft.core.component.DataComponents.ATTRIBUTE_MODIFIERS, net.minecraft.world.item.component.ItemAttributeModifiers.EMPTY);
+            icon.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, itemName);
+            icon.set(net.minecraft.core.component.DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
             options.add(icon);
         }
 
@@ -126,7 +140,7 @@ public class MenuHelper {
                 if (player.level().getServer() != null) {
                     player.level().getServer().execute(() -> {
                         if (index >= 0 && index < allRoles.size()) {
-                            natjom.nocturne.game.CompositionManager.cycleRole(allRoles.get(index));
+                            CompositionManager.cycleRole(allRoles.get(index));
                             openCompoMenu(player);
                         }
                     });
@@ -146,12 +160,12 @@ public class MenuHelper {
 
     public static void openCompoSetMenu(ServerPlayer player) {
         List<ItemStack> options = new java.util.ArrayList<>();
-        natjom.nocturne.game.CompoSet[] sets = natjom.nocturne.game.CompoSet.values();
+        CompoSet[] sets = CompoSet.values();
 
-        for (natjom.nocturne.game.CompoSet set : sets) {
-            ItemStack icon = new ItemStack(net.minecraft.world.item.Items.BOOK);
-            boolean isActive = (natjom.nocturne.game.CompositionManager.activeCompoSet == set);
-            int count = isActive ? natjom.nocturne.game.CompositionManager.activeCompoPlayerCount : set.getMinPlayers();
+        for (CompoSet set : sets) {
+            ItemStack icon = new ItemStack(Items.BOOK);
+            boolean isActive = (CompositionManager.activeCompoSet == set);
+            int count = isActive ? CompositionManager.activeCompoPlayerCount : set.getMinPlayers();
 
             if (count > 0 && count <= 64) {
                 icon.setCount(count);
@@ -161,7 +175,7 @@ public class MenuHelper {
                 icon.set(net.minecraft.core.component.DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true);
             }
 
-            net.minecraft.network.chat.MutableComponent name = Component.literal(set.getDisplayName());
+            MutableComponent name = Component.literal(set.getDisplayName());
             if (isActive) {
                 name.append(" §a(Sélectionné : " + count + " joueurs)");
             } else {
@@ -188,17 +202,17 @@ public class MenuHelper {
                 if (player.level().getServer() != null) {
                     player.level().getServer().execute(() -> {
                         if (index >= 0 && index < sets.length) {
-                            natjom.nocturne.game.CompoSet clickedSet = sets[index];
+                            CompoSet clickedSet = sets[index];
                             int newCount = clickedSet.getMinPlayers();
 
-                            if (natjom.nocturne.game.CompositionManager.activeCompoSet == clickedSet) {
-                                newCount = natjom.nocturne.game.CompositionManager.activeCompoPlayerCount + 1;
+                            if (CompositionManager.activeCompoSet == clickedSet) {
+                                newCount = CompositionManager.activeCompoPlayerCount + 1;
                                 if (newCount > clickedSet.getMaxPlayers()) {
                                     newCount = clickedSet.getMinPlayers();
                                 }
                             }
 
-                            natjom.nocturne.game.CompositionManager.applyCompoSet(clickedSet, newCount);
+                            CompositionManager.applyCompoSet(clickedSet, newCount);
                             openCompoSetMenu(player);
                         }
                     });

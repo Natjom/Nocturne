@@ -1,17 +1,19 @@
 package natjom.nocturne.game;
 
 import natjom.nocturne.game.role.Role;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import natjom.nocturne.game.role.crepuscule.Artefact;
+
+import java.util.*;
 
 public class GameBoard {
     private final Map<UUID, Role> initialRoles = new HashMap<>();
     private final Map<UUID, Role> currentRoles = new HashMap<>();
     private final List<Role> centerCards = new ArrayList<>();
+    private final Set<UUID> shieldedCards = new HashSet<>();
+    private final Set<UUID> revealedCards = new HashSet<>();
+    private final Set<UUID> playersWhoActed = new HashSet<>();
+    private final List<UUID> circleOrder = new ArrayList<>();
+    private final Map<UUID, Artefact> playerArtifacts = new HashMap<>();
 
     public void setup(List<UUID> players, List<Role> deck) {
         Collections.shuffle(deck);
@@ -22,11 +24,17 @@ public class GameBoard {
 
         for (UUID player : players) {
             Role assignedRole = deck.removeFirst();
+            circleOrder.clear();
+            circleOrder.addAll(players);
             initialRoles.put(player, assignedRole);
             currentRoles.put(player, assignedRole);
         }
 
         initialRoles.clear();
+        shieldedCards.clear();
+        revealedCards.clear();
+        playersWhoActed.clear();
+        playerArtifacts.clear();
         initialRoles.putAll(currentRoles);
     }
 
@@ -37,9 +45,7 @@ public class GameBoard {
         return allRoles;
     }
 
-    public Role getCurrentRole(UUID player) {
-        return currentRoles.get(player);
-    }
+    public Role getCurrentRole(UUID player) { return currentRoles.get(player); }
 
     public Role getInitialRole(UUID player) { return initialRoles.get(player); }
 
@@ -50,20 +56,55 @@ public class GameBoard {
         return null;
     }
 
-    public void swapPlayerRoles(java.util.UUID player1, java.util.UUID player2) {
-        natjom.nocturne.game.role.Role role1 = this.getCurrentRole(player1);
-        natjom.nocturne.game.role.Role role2 = this.getCurrentRole(player2);
+    public void swapPlayerRoles(UUID player1, UUID player2) {
+        Role role1 = this.getCurrentRole(player1);
+        Role role2 = this.getCurrentRole(player2);
 
         this.currentRoles.put(player1, role2);
         this.currentRoles.put(player2, role1);
     }
 
-    public void swapPlayerWithCenter(java.util.UUID player, int centerIndex) {
-        natjom.nocturne.game.role.Role playerRole = this.getCurrentRole(player);
-        natjom.nocturne.game.role.Role centerRole = this.getCenterCard(centerIndex);
+    public void swapPlayerWithCenter(UUID player, int centerIndex) {
+        Role playerRole = this.getCurrentRole(player);
+        Role centerRole = this.getCenterCard(centerIndex);
 
         this.currentRoles.put(player, centerRole);
         this.centerCards.set(centerIndex, playerRole);
+    }
+
+    public void addShield(UUID playerId) {
+        this.shieldedCards.add(playerId);
+    }
+
+    public boolean isShielded(UUID playerId) {
+        return this.shieldedCards.contains(playerId);
+    }
+
+    public Set<UUID> getShieldedCards() {
+        return this.shieldedCards;
+    }
+
+    public void setCurrentRole(UUID playerId, Role newRole) {
+        this.currentRoles.put(playerId, newRole);
+    }
+
+    public void addRevealedCard(UUID playerId) { this.revealedCards.add(playerId); }
+
+    public Set<UUID> getRevealedCards() { return this.revealedCards; }
+
+    public void addPlayerAction(UUID playerId) { this.playersWhoActed.add(playerId); }
+
+    public Set<UUID> getPlayersWhoActed() { return this.playersWhoActed; }
+
+    public List<UUID> getCircleOrder() { return this.circleOrder; }
+
+    public void setArtifact(UUID player, Artefact artifact) { this.playerArtifacts.put(player, artifact); }
+
+    public Artefact getArtifact(UUID player) { return this.playerArtifacts.get(player); }
+
+    public boolean hasPowerCancelled(UUID player) {
+        Artefact artefact = this.getArtifact(player);
+        return artefact != null && artefact.isCancelsPowers();
     }
 
 }

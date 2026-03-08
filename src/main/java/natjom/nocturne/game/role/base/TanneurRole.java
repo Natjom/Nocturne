@@ -11,7 +11,7 @@ public class TanneurRole extends Role {
 
     @Override
     public Component getDisplayName() {
-        return Component.literal("Tanneur");
+        return Component.literal("§bTanneur");
     }
 
     @Override

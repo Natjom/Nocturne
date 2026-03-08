@@ -16,13 +16,13 @@ public class NocturneCommand {
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("nocturne")
-                .requires(source -> {
-                    if (source.getEntity() instanceof ServerPlayer player) {
-                        return source.getServer().getPlayerList().isOp(player.nameAndId());
-                    }
-                    return true;
-                })
                 .then(Commands.literal("start")
+                        .requires(source -> {
+                            if (source.getEntity() instanceof ServerPlayer player) {
+                                return source.getServer().getPlayerList().isOp(player.nameAndId());
+                            }
+                            return true;
+                        })
                         .executes(context -> {
                             CommandSourceStack source = context.getSource();
                             ServerPlayer master = source.getPlayerOrException();
@@ -46,6 +46,12 @@ public class NocturneCommand {
                         })
                 )
                 .then(Commands.literal("stop")
+                        .requires(source -> {
+                            if (source.getEntity() instanceof ServerPlayer player) {
+                                return source.getServer().getPlayerList().isOp(player.nameAndId());
+                            }
+                            return true;
+                        })
                         .executes(context -> {
                             CommandSourceStack source = context.getSource();
 
@@ -65,6 +71,12 @@ public class NocturneCommand {
                         })
                 )
                 .then(Commands.literal("pause")
+                        .requires(source -> {
+                            if (source.getEntity() instanceof ServerPlayer player) {
+                                return source.getServer().getPlayerList().isOp(player.nameAndId());
+                            }
+                            return true;
+                        })
                         .executes(context -> {
                             CommandSourceStack source = context.getSource();
 
@@ -103,6 +115,12 @@ public class NocturneCommand {
                         })
                 )
                 .then(Commands.literal("compo")
+                        .requires(source -> {
+                            if (source.getEntity() instanceof ServerPlayer player) {
+                                return source.getServer().getPlayerList().isOp(player.nameAndId());
+                            }
+                            return true;
+                        })
                         .executes(context -> {
                             ServerPlayer player = context.getSource().getPlayerOrException();
                             MenuHelper.openCompoMenu(player);
@@ -119,6 +137,12 @@ public class NocturneCommand {
                         })
                 )
                 .then(Commands.literal("_endGame")
+                        .requires(source -> {
+                            if (source.getEntity() instanceof ServerPlayer player) {
+                                return source.getServer().getPlayerList().isOp(player.nameAndId());
+                            }
+                            return true;
+                        })
                         .executes(context -> {
                             ServerPlayer player = context.getSource().getPlayerOrException();
                             if (currentSession != null && player.getUUID().equals(currentSession.getGameMaster())) {
@@ -128,6 +152,12 @@ public class NocturneCommand {
                         })
                 )
                 .then(Commands.literal("composet")
+                        .requires(source -> {
+                            if (source.getEntity() instanceof ServerPlayer player) {
+                                return source.getServer().getPlayerList().isOp(player.nameAndId());
+                            }
+                            return true;
+                        })
                         .executes(context -> {
                             ServerPlayer player = context.getSource().getPlayerOrException();
                             MenuHelper.openCompoSetMenu(player);

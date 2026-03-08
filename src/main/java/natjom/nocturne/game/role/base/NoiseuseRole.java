@@ -15,7 +15,7 @@ public class NoiseuseRole extends Role {
 
     @Override
     public Component getDisplayName() {
-        return Component.literal("Noiseuse");
+        return Component.literal("§aNoiseuse");
     }
 
     @Override
@@ -43,7 +43,7 @@ public class NoiseuseRole extends Role {
         List<ServerPlayer> validTargets = new ArrayList<>();
 
         for (ServerPlayer target : session.getServerPlayers()) {
-            if (!target.getUUID().equals(player.getUUID())) {
+            if (!target.getUUID().equals(player.getUUID()) && !session.getBoard().isShielded(target.getUUID())) {
                 options.add(MenuIcons.makePlayerHead(target, "§e"));
                 validTargets.add(target);
             }
@@ -60,7 +60,7 @@ public class NoiseuseRole extends Role {
         List<ServerPlayer> validTargets = new ArrayList<>();
 
         for (ServerPlayer target : session.getServerPlayers()) {
-            if (!target.getUUID().equals(player.getUUID()) && !target.getUUID().equals(firstTarget.getUUID())) {
+            if (!target.getUUID().equals(player.getUUID()) && !target.getUUID().equals(firstTarget.getUUID()) && !session.getBoard().isShielded(target.getUUID())) {
                 options.add(MenuIcons.makePlayerHead(target, "§e"));
                 validTargets.add(target);
             }
@@ -73,6 +73,7 @@ public class NoiseuseRole extends Role {
 
             player.sendSystemMessage(Component.literal("§dTu as échangé les cartes de " + firstTarget.getPlainTextName() + " et " + secondTarget.getPlainTextName() + "."));
             session.addHistory("La Noiseuse (" + player.getPlainTextName() + ") a échangé " + firstTarget.getPlainTextName() + " et " + secondTarget.getPlainTextName() + ".");
+            session.getBoard().addPlayerAction(player.getUUID());
         });
     }
 }

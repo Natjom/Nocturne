@@ -6,16 +6,19 @@ import natjom.nocturne.gui.MenuHelper;
 import natjom.nocturne.util.MenuIcons;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class LoupRole extends Role {
 
     @Override
     public Component getDisplayName() {
-        return Component.literal("Loup");
+        return Component.literal("§cLoup");
     }
 
     @Override
@@ -33,11 +36,11 @@ public class LoupRole extends Role {
 
     @Override
     public void onWakeUp(ServerPlayer player, GameSession session) {
-        long wolfCount = session.getServerPlayers().stream()
+        List<ServerPlayer> wolfPack = session.getServerPlayers().stream()
                 .filter(p -> session.getBoard().getInitialRole(p.getUUID()) instanceof LoupRole)
-                .count();
+                .toList();
 
-        if (wolfCount == 1) {
+        if (wolfPack.size() == 1) {
             player.sendSystemMessage(Component.literal("§c[Nuit] Tu te réveilles seul. Choisis une carte du centre à regarder :"));
 
             List<ItemStack> options = List.of(
@@ -53,11 +56,24 @@ public class LoupRole extends Role {
                     player.sendSystemMessage(Component.literal("§dC'est un(e) : §l" + seenRole.getDisplayName().getString()));
 
                     session.addHistory("Le Loup (" + player.getPlainTextName() + ") a regardé le Centre " + (index + 1) + " (" + seenRole.getDisplayName().getString() + ").");
+                    session.getBoard().addPlayerAction(player.getUUID());
                 }
             });
 
         } else {
-            player.sendSystemMessage(Component.literal("§c[Nuit] Tu te réveilles avec tes alliés Loups. Vous vous regardez silencieusement."));
+            List<String> wolfNames = wolfPack.stream()
+                    .filter(p -> !p.getUUID().equals(player.getUUID()))
+                    .map(p -> {
+                        Role r = session.getBoard().getInitialRole(p.getUUID());
+                        if (r instanceof natjom.nocturne.game.role.crepuscule.LoupReveurRole) {
+                            return p.getPlainTextName() + " §7(Rêveur)§c";
+                        }
+                        return p.getPlainTextName();
+                    })
+                    .toList();
+
+            player.sendSystemMessage(Component.literal("§cLes autres Loups sont : " + String.join(", ", wolfNames)));
+            session.addHistory("Le Loup (" + player.getPlainTextName() + ") a vu sa meute.");
         }
     }
 

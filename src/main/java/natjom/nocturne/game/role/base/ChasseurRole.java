@@ -6,7 +6,7 @@ import net.minecraft.network.chat.Component;
 public class ChasseurRole extends Role {
 
     @Override
-    public Component getDisplayName() { return Component.literal("Chasseur"); }
+    public Component getDisplayName() { return Component.literal("§aChasseur"); }
 
     @Override
     public int getNightOrder() { return 0; }

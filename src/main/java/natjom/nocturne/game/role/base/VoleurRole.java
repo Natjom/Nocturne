@@ -15,7 +15,7 @@ public class VoleurRole extends Role {
 
     @Override
     public Component getDisplayName() {
-        return Component.literal("Voleur");
+        return Component.literal("§aVoleur");
     }
 
     @Override
@@ -35,13 +35,20 @@ public class VoleurRole extends Role {
 
     @Override
     public void onWakeUp(ServerPlayer player, GameSession session) {
+
+        if (session.getBoard().isShielded(player.getUUID())) {
+            player.sendSystemMessage(Component.literal("§c[Nuit] Tu essaies de te lever... mais un bouclier protège ta carte ! Tu ne peux rien faire."));
+            session.addHistory("Le voleur (" + player.getPlainTextName() + ") n'a pas pu échanger sa carte car elle était protégée.");
+            return;
+        }
+
         player.sendSystemMessage(Component.literal("§c[Nuit] Tu te réveilles. Choisis un joueur à qui voler la carte :"));
 
         List<ItemStack> options = new ArrayList<>();
         List<ServerPlayer> validTargets = new ArrayList<>();
 
         for (ServerPlayer target : session.getServerPlayers()) {
-            if (!target.getUUID().equals(player.getUUID())) {
+            if (!target.getUUID().equals(player.getUUID()) && !session.getBoard().isShielded(target.getUUID())) {
                 options.add(MenuIcons.makePlayerHead(target, "§e"));
                 validTargets.add(target);
             }
@@ -58,6 +65,7 @@ public class VoleurRole extends Role {
             player.sendSystemMessage(Component.literal("§dTu es maintenant : §l" + stolenRole.getDisplayName().getString()));
 
             session.addHistory("Le Voleur (" + player.getPlainTextName() + ") a volé la carte de " + target.getPlainTextName() + " (" + stolenRole.getDisplayName().getString() + ").");
+            session.getBoard().addPlayerAction(player.getUUID());
         });
     }
 }

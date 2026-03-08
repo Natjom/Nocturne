@@ -9,7 +9,7 @@ import java.util.List;
 public class SoeursRole extends Role {
 
     @Override
-    public Component getDisplayName() { return Component.literal("Soeur"); }
+    public Component getDisplayName() { return Component.literal("§aSoeur"); }
 
     @Override
     public int getNightOrder() { return 19; }
@@ -24,20 +24,26 @@ public class SoeursRole extends Role {
     public boolean hasNightAction() { return true; }
 
     @Override
-    public void onWakeUp(ServerPlayer player, GameSession session) {
-        List<String> sisterNames = session.getServerPlayers().stream()
+    public void onWakeUp(net.minecraft.server.level.ServerPlayer player, natjom.nocturne.game.GameSession session) {
+        java.util.List<String> sisterNames = session.getServerPlayers().stream()
                 .filter(p -> !p.getUUID().equals(player.getUUID()))
-                .filter(p -> session.getBoard().getInitialRole(p.getUUID()) instanceof SoeursRole)
-                .map(ServerPlayer::getPlainTextName)
+                .filter(p -> {
+                    Role initialRole = session.getBoard().getInitialRole(p.getUUID());
+                    boolean isSoeur = initialRole instanceof SoeursRole;
+                    boolean isSosieSoeur = initialRole instanceof SosieRole &&
+                            ((SosieRole) initialRole).getCopiedRole() instanceof SoeursRole;
+                    return isSoeur || isSosieSoeur;
+                })
+                .map(net.minecraft.server.level.ServerPlayer::getPlainTextName)
                 .toList();
 
-        player.sendSystemMessage(Component.literal("§c[Nuit] Tu ouvres les yeux pour chercher ta soeur..."));
+        player.sendSystemMessage(net.minecraft.network.chat.Component.literal("§c[Nuit] Tu ouvres les yeux pour chercher ta soeur..."));
 
         if (sisterNames.isEmpty()) {
-            player.sendSystemMessage(Component.literal("§dTu es seule, malheureusement."));
+            player.sendSystemMessage(net.minecraft.network.chat.Component.literal("§dTu es seule, malheureusement."));
             session.addHistory("La Soeur (" + player.getPlainTextName() + ") s'est réveillée seule.");
         } else {
-            player.sendSystemMessage(Component.literal("§dTa soeur est : §l" + String.join(", ", sisterNames)));
+            player.sendSystemMessage(net.minecraft.network.chat.Component.literal("§dTa soeur est : §l" + String.join(", ", sisterNames)));
             session.addHistory("La Soeur (" + player.getPlainTextName() + ") a vu sa soeur : " + String.join(", ", sisterNames) + ".");
         }
     }

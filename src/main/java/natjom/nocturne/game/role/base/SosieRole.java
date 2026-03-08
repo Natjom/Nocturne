@@ -10,12 +10,15 @@ import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class SosieRole extends Role {
 
+    private Role copiedRole;
+
     @Override
     public Component getDisplayName() {
-        return Component.literal("Sosie");
+        return Component.literal("§7Sosie");
     }
 
     @Override
@@ -50,12 +53,14 @@ public class SosieRole extends Role {
 
         MenuHelper.openChoiceMenu(player, "§8Sosie : Copier qui ?", options, index -> {
             ServerPlayer target = validTargets.get(index);
-            Role copiedRole = session.getBoard().getCurrentRole(target.getUUID());
+            this.copiedRole = session.getBoard().getCurrentRole(target.getUUID());
 
             player.sendSystemMessage(Component.literal("§dTu as copié le rôle de " + target.getPlainTextName() + "."));
             player.sendSystemMessage(Component.literal("§dTu es maintenant : §l" + copiedRole.getDisplayName().getString()));
 
             session.addHistory("Le Sosie (" + player.getPlainTextName() + ") a copié " + target.getPlainTextName() + " (" + copiedRole.getDisplayName().getString() + ").");
+            session.getBoard().addPlayerAction(player.getUUID());
+
 
             if (copiedRole.hasNightAction() && copiedRole.getNightOrder() > this.getNightOrder()) {
                 if (player.level().getServer() != null) {
@@ -63,5 +68,17 @@ public class SosieRole extends Role {
                 }
             }
         });
+    }
+
+    public Object getCopiedRole() {
+        return this.copiedRole;
+    }
+
+    @Override
+    public boolean didWin(GameSession session, UUID myId, List<UUID> eliminated) {
+        if (this.copiedRole != null) {
+            return this.copiedRole.didWin(session, myId, eliminated);
+        }
+        return false;
     }
 }

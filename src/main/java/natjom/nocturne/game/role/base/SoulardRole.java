@@ -15,7 +15,7 @@ public class SoulardRole extends Role {
 
     @Override
     public Component getDisplayName() {
-        return Component.literal("Soûlard");
+        return Component.literal("§aSoûlard");
     }
 
     @Override
@@ -35,6 +35,13 @@ public class SoulardRole extends Role {
 
     @Override
     public void onWakeUp(ServerPlayer player, GameSession session) {
+
+        if (session.getBoard().isShielded(player.getUUID())) {
+            player.sendSystemMessage(Component.literal("§c[Nuit] Tu essaies de te lever... mais un bouclier protège ta carte ! Tu ne peux rien faire."));
+            session.addHistory("Le Soûlard (" + player.getPlainTextName() + ") n'a pas pu échanger sa carte car elle était protégée.");
+            return;
+        }
+
         List<ItemStack> options = new ArrayList<>();
 
         for (int i = 0; i < 3; i++) {
@@ -48,6 +55,7 @@ public class SoulardRole extends Role {
             player.sendSystemMessage(Component.literal("§dTu as échangé ta carte avec la carte du centre n°" + (index + 1) + ". Tu ne sais pas ce que tu es devenu !"));
 
             session.addHistory("Le Soûlard (" + player.getPlainTextName() + ") a échangé sa carte avec le centre " + (index + 1) + ".");
+            session.getBoard().addPlayerAction(player.getUUID());
         });
     }
 }
