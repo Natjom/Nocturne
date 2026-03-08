@@ -17,6 +17,7 @@ public class NightCycleManager {
     private int timer = 0;
     private int currentMaxTime = 1;
     private final ServerBossEvent nightBossBar;
+    private boolean hasCheckedMarques = false;
 
     public NightCycleManager(GameSession session) {
         this.session = session;
@@ -79,6 +80,31 @@ public class NightCycleManager {
         }
 
         Role currentRole = wakeUpOrder.get(currentPhaseIndex);
+
+        boolean hasVampireDLC = this.session.getBoard().getAllRolesInGame().stream()
+                .anyMatch(r -> r instanceof natjom.nocturne.game.role.vampire.VampireExtensionRole);
+
+        if (hasVampireDLC && !this.hasCheckedMarques && currentRole.getNightOrder() >= 12) {
+            this.hasCheckedMarques = true;
+            this.currentPhaseIndex--;
+
+            this.currentMaxTime = 100;
+            this.timer = this.currentMaxTime;
+            this.nightBossBar.setName(Component.literal("§5§lPhase de lecture des Marques"));
+
+            for (net.minecraft.server.level.ServerPlayer sp : this.session.getServerPlayers()) {
+                natjom.nocturne.game.role.vampire.Marque myMarque = this.session.getBoard().getPlayerMarque(sp.getUUID());
+
+                if (myMarque != null) {
+                    sp.sendSystemMessage(net.minecraft.network.chat.Component.literal("§8================================="));
+                    sp.sendSystemMessage(net.minecraft.network.chat.Component.literal("§c[Crépuscule] Il est temps de regarder ta Marque."));
+                    sp.sendSystemMessage(net.minecraft.network.chat.Component.literal("§eTa marque actuelle est : §l" + myMarque.getDisplayName().getString()));
+                    sp.sendSystemMessage(net.minecraft.network.chat.Component.literal("§8================================="));
+                }
+            }
+            return;
+        }
+
         this.currentMaxTime = currentRole.getActionDuration();
         this.timer = this.currentMaxTime;
 

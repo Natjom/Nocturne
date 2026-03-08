@@ -4,6 +4,7 @@ import natjom.nocturne.Nocturne;
 import natjom.nocturne.game.role.*;
 import natjom.nocturne.game.role.base.*;
 import natjom.nocturne.game.role.crepuscule.*;
+import natjom.nocturne.game.role.vampire.VampireRole;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
@@ -20,6 +21,8 @@ public class NocturneRegistries {
 
     public static final Registry<Role> REGISTRY = ROLES.makeRegistry(builder -> { builder.defaultKey(Identifier.fromNamespaceAndPath(Nocturne.MODID, "villageois")); });
 
+    // ----------------------------------------------------------------- //
+
     public static final DeferredHolder<Role, Role> VILLAGEOIS =
             ROLES.register("villageois", VillageoisRole::new);
 
@@ -35,8 +38,15 @@ public class NocturneRegistries {
     public static final DeferredHolder<Role, Role> PROTECTEUR =
             ROLES.register("protecteur", ProtecteurRole::new);
 
+    // ----------------------------------------------------------------- //
+
     public static final DeferredHolder<Role, Role> SOSIE =
             ROLES.register("sosie", SosieRole::new);
+
+    public static final DeferredHolder<Role, Role> VAMPIRE =
+            ROLES.register("vampire", VampireRole::new);
+
+    // ----------------------------------------------------------------- //
 
     public static final DeferredHolder<Role, Role> GUETTEUR =
             ROLES.register("guetteur", GuetteurRole::new);
@@ -94,4 +104,6 @@ public class NocturneRegistries {
 
     public static final DeferredHolder<Role, Role> CONSERVATEUR =
             ROLES.register("conservateur", ConservateurRole::new);
+
+    // ----------------------------------------------------------------- //
 }

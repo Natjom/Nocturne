@@ -1,11 +1,12 @@
 package natjom.nocturne.game;
 
-import natjom.nocturne.game.role.base.ChasseurRole;
+import natjom.nocturne.game.role.base.*;
 import natjom.nocturne.game.role.Role;
-import natjom.nocturne.game.role.base.SosieRole;
 import natjom.nocturne.game.role.crepuscule.Artefact;
 import natjom.nocturne.game.role.crepuscule.PoliticienRole;
 import natjom.nocturne.game.role.crepuscule.ProtecteurRole;
+import natjom.nocturne.game.role.vampire.Marque;
+import natjom.nocturne.game.role.vampire.VampireRole;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerBossEvent;
@@ -309,10 +310,15 @@ public class GameSession {
 
         this.revealedPlayers.add(player.getUUID());
         Role finalRole = this.board.getCurrentRole(player.getUUID());
+        natjom.nocturne.game.role.vampire.Marque marque = this.board.getPlayerMarque(player.getUUID());
+
+        String marqueInfo = (marque != null && marque != natjom.nocturne.game.role.vampire.Marque.CLARTE)
+                ? " §r§7[" + marque.getDisplayName().getString() + "§7]"
+                : "";
 
         for (ServerPlayer sp : this.serverPlayers) {
-            sp.sendSystemMessage(Component.literal("§d" + player.getPlainTextName() + " révèle son rôle : §l" + finalRole.getDisplayName().getString()));
-            sp.playSound(SoundEvents.EXPERIENCE_ORB_PICKUP, 1.0F, 1.0F);
+            sp.sendSystemMessage(Component.literal("§d" + player.getPlainTextName() + " révèle son rôle : §l" + finalRole.getDisplayName().getString() + marqueInfo));
+            sp.playSound(net.minecraft.sounds.SoundEvents.EXPERIENCE_ORB_PICKUP, 1.0F, 1.0F);
         }
 
         if (this.compoObjective != null && !this.serverPlayers.isEmpty()) {
@@ -330,32 +336,38 @@ public class GameSession {
         this.isWaitingForReveal = false;
         this.addHistory("§e--- Résultats ---");
 
-        for (ServerPlayer sp : this.serverPlayers) {
-            Role finalRole = this.board.getCurrentRole(sp.getUUID());
-            natjom.nocturne.game.role.crepuscule.Artefact artifact = this.board.getArtifact(sp.getUUID());
+        for (net.minecraft.server.level.ServerPlayer sp : this.serverPlayers) {
+            natjom.nocturne.game.role.Role finalRole = this.board.getCurrentRole(sp.getUUID());
+            Artefact artifact = this.board.getArtifact(sp.getUUID());
+            Marque marque = this.board.getPlayerMarque(sp.getUUID());
 
             boolean won;
 
-            if (artifact == natjom.nocturne.game.role.crepuscule.Artefact.GRIFFE_LOUP_GAROU) {
-                won = new natjom.nocturne.game.role.base.LoupRole().didWin(this, sp.getUUID(), this.eliminatedPlayers);
-            } else if (artifact == natjom.nocturne.game.role.crepuscule.Artefact.MARQUE_VILLAGEOIS) {
-                won = new natjom.nocturne.game.role.base.VillageoisRole().didWin(this, sp.getUUID(), this.eliminatedPlayers);
-            } else if (artifact == natjom.nocturne.game.role.crepuscule.Artefact.GOURDIN_TANNEUR) {
-                won = new natjom.nocturne.game.role.base.TanneurRole().didWin(this, sp.getUUID(), this.eliminatedPlayers);
+            if (artifact == Artefact.GRIFFE_LOUP_GAROU) {
+                won = new LoupRole().didWin(this, sp.getUUID(), this.eliminatedPlayers);
+            } else if (artifact == Artefact.MARQUE_VILLAGEOIS) {
+                won = new VillageoisRole().didWin(this, sp.getUUID(), this.eliminatedPlayers);
+            } else if (artifact == Artefact.GOURDIN_TANNEUR) {
+                won = new TanneurRole().didWin(this, sp.getUUID(), this.eliminatedPlayers);
+            } else if (marque == Marque.VAMPIRE) {
+                won = new VampireRole().didWin(this, sp.getUUID(), this.eliminatedPlayers);
             } else {
                 won = finalRole.didWin(this, sp.getUUID(), this.eliminatedPlayers);
             }
 
             String artifactInfo = artifact != null ? " §6(" + artifact.getDisplayName() + "§6)" : "";
+            String marqueInfo = (marque != null && marque != natjom.nocturne.game.role.vampire.Marque.CLARTE)
+                    ? " §r§7[" + marque.getDisplayName().getString() + "§7]"
+                    : "";
 
             if (won) {
-                sp.sendSystemMessage(Component.literal("§a§lVICTOIRE ! §r§aTu as gagné."));
-                this.addHistory(sp.getPlainTextName() + " a GAGNÉ avec le rôle " + finalRole.getDisplayName().getString() + artifactInfo);
-                sp.playSound(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, 1.0F, 1.0F);
+                sp.sendSystemMessage(net.minecraft.network.chat.Component.literal("§a§lVICTOIRE ! §r§aTu as gagné."));
+                this.addHistory(sp.getPlainTextName() + " a GAGNÉ avec le rôle " + finalRole.getDisplayName().getString() + artifactInfo + marqueInfo);
+                sp.playSound(net.minecraft.sounds.SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, 1.0F, 1.0F);
             } else {
-                sp.sendSystemMessage(Component.literal("§c§lDÉFAITE ! §r§cTu as perdu."));
-                this.addHistory(sp.getPlainTextName() + " a PERDU avec le rôle " + finalRole.getDisplayName().getString() + artifactInfo);
-                sp.playSound(SoundEvents.VILLAGER_NO, 1.0F, 1.0F);
+                sp.sendSystemMessage(net.minecraft.network.chat.Component.literal("§c§lDÉFAITE ! §r§cTu as perdu."));
+                this.addHistory(sp.getPlainTextName() + " a PERDU avec le rôle " + finalRole.getDisplayName().getString() + artifactInfo + marqueInfo);
+                sp.playSound(net.minecraft.sounds.SoundEvents.VILLAGER_NO, 1.0F, 1.0F);
             }
         }
 
@@ -363,8 +375,8 @@ public class GameSession {
     }
 
     public void start() {
-        natjom.nocturne.game.CompositionManager.initDefault();
-        List<natjom.nocturne.game.role.Role> deck = natjom.nocturne.game.CompositionManager.buildDeck();
+        CompositionManager.initDefault();
+        List<Role> deck = CompositionManager.buildDeck();
 
         int requiredCards = this.players.size() + 3;
         if (deck.size() != requiredCards) {
@@ -378,13 +390,12 @@ public class GameSession {
 
         this.board.setup(this.players, deck);
 
-
         List<String> circleNames = new ArrayList<>();
         for (UUID id : this.board.getCircleOrder()) {
             ServerPlayer p = this.serverPlayers.stream().filter(sp -> sp.getUUID().equals(id)).findFirst().orElse(null);
             if (p != null) circleNames.add(p.getPlainTextName());
         }
-        String circleString = String.join(" §8> §e", circleNames) + " §8> §e" + circleNames.get(0); // Boucle visuelle
+        String circleString = String.join(" §8> §e", circleNames) + " §8> §e" + circleNames.get(0);
 
         for (ServerPlayer sp : this.serverPlayers) {
             if (sp.getUUID().equals(this.gameMaster)) {
