@@ -187,47 +187,73 @@ public class GameSession {
     private void resolveVotes() {
         this.currentState = GameState.END;
 
-        Map<UUID, Integer> voteCounts = new HashMap<>();
+        java.util.Map<UUID, Integer> voteCounts = new java.util.HashMap<>();
 
         for (UUID target : this.votes.values()) {
             voteCounts.put(target, voteCounts.getOrDefault(target, 0) + 1);
         }
 
-        Set<UUID> protectedPlayers = new HashSet<>();
-        for (ServerPlayer sp : this.serverPlayers) {
-            Role role = this.board.getCurrentRole(sp.getUUID());
+        java.util.Set<UUID> protectedPlayers = new java.util.HashSet<>();
+        for (net.minecraft.server.level.ServerPlayer sp : this.serverPlayers) {
+            natjom.nocturne.game.role.Role role = this.board.getCurrentRole(sp.getUUID());
 
             if (!this.board.hasPowerCancelled(sp.getUUID())) {
-            if (role instanceof PoliticienRole || (role instanceof SosieRole && ((SosieRole) role).getCopiedRole() instanceof PoliticienRole)) {
-                protectedPlayers.add(sp.getUUID());
-            }
-
-            if (role instanceof ProtecteurRole || (role instanceof SosieRole && ((SosieRole) role).getCopiedRole() instanceof ProtecteurRole)) {
-                UUID protectedByBodyguard = this.votes.get(sp.getUUID());
-                if (protectedByBodyguard != null) {
-                    protectedPlayers.add(protectedByBodyguard);
+                if (role instanceof PoliticienRole || (role instanceof natjom.nocturne.game.role.base.SosieRole && ((natjom.nocturne.game.role.base.SosieRole) role).getCopiedRole() instanceof PoliticienRole)) {
+                    protectedPlayers.add(sp.getUUID());
                 }
-            }
+
+                if (role instanceof ProtecteurRole || (role instanceof natjom.nocturne.game.role.base.SosieRole && ((natjom.nocturne.game.role.base.SosieRole) role).getCopiedRole() instanceof ProtecteurRole)) {
+                    UUID protectedByBodyguard = this.votes.get(sp.getUUID());
+                    if (protectedByBodyguard != null) {
+                        protectedPlayers.add(protectedByBodyguard);
+                    }
+                }
+
+                if (role instanceof natjom.nocturne.game.role.vampire.LeMaitreRole || (role instanceof natjom.nocturne.game.role.base.SosieRole && ((natjom.nocturne.game.role.base.SosieRole) role).getCopiedRole() instanceof natjom.nocturne.game.role.vampire.LeMaitreRole)) {
+                    boolean savedByVampire = false;
+                    for (java.util.Map.Entry<UUID, UUID> voteEntry : this.votes.entrySet()) {
+                        UUID voterId = voteEntry.getKey();
+                        UUID votedTarget = voteEntry.getValue();
+
+                        if (votedTarget.equals(sp.getUUID()) && !voterId.equals(sp.getUUID())) {
+                            natjom.nocturne.game.role.Role voterRole = this.board.getCurrentRole(voterId);
+                            natjom.nocturne.game.role.vampire.Marque voterMarque = this.board.getPlayerMarque(voterId);
+
+                            boolean isVampire = voterRole instanceof natjom.nocturne.game.role.vampire.VampireRole
+                                    || voterRole instanceof natjom.nocturne.game.role.vampire.LeComteRole
+                                    || voterMarque == natjom.nocturne.game.role.vampire.Marque.VAMPIRE;
+
+                            if (isVampire) {
+                                savedByVampire = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (savedByVampire) {
+                        protectedPlayers.add(sp.getUUID());
+                    }
+                }
             }
         }
 
-        List<Integer> distinctVoteCounts = voteCounts.values().stream()
+        java.util.List<Integer> distinctVoteCounts = voteCounts.values().stream()
                 .distinct()
-                .sorted(Comparator.reverseOrder())
+                .sorted(java.util.Comparator.reverseOrder())
                 .toList();
 
-        List<UUID> eliminated = new ArrayList<>();
+        java.util.List<UUID> eliminated = new java.util.ArrayList<>();
         for (int count : distinctVoteCounts) {
             if (count <= 1) break;
 
-            List<UUID> candidates = new ArrayList<>();
-            for (Map.Entry<UUID, Integer> entry : voteCounts.entrySet()) {
+            java.util.List<UUID> candidates = new java.util.ArrayList<>();
+            for (java.util.Map.Entry<UUID, Integer> entry : voteCounts.entrySet()) {
                 if (entry.getValue() == count) {
                     candidates.add(entry.getKey());
                 }
             }
 
-            List<UUID> unprotectedCandidates = candidates.stream()
+            java.util.List<UUID> unprotectedCandidates = candidates.stream()
                     .filter(id -> !protectedPlayers.contains(id))
                     .toList();
 
@@ -238,16 +264,16 @@ public class GameSession {
         }
 
         if (eliminated.isEmpty()) {
-            for (ServerPlayer sp : this.serverPlayers) {
-                sp.sendSystemMessage(Component.literal("§eÉgalité parfaite. Personne n'est éliminé !"));
+            for (net.minecraft.server.level.ServerPlayer sp : this.serverPlayers) {
+                sp.sendSystemMessage(net.minecraft.network.chat.Component.literal("§eÉgalité parfaite. Personne n'est éliminé !"));
             }
         } else {
-            List<UUID> extraEliminations = new ArrayList<>();
+            java.util.List<UUID> extraEliminations = new java.util.ArrayList<>();
             for (UUID deadId : eliminated) {
-                Role deadRole = this.board.getCurrentRole(deadId);
+                natjom.nocturne.game.role.Role deadRole = this.board.getCurrentRole(deadId);
 
-                boolean isHunter = deadRole instanceof ChasseurRole;
-                boolean isSosieHunter = (deadRole instanceof SosieRole) && (((SosieRole) deadRole).getCopiedRole() instanceof ChasseurRole);
+                boolean isHunter = deadRole instanceof natjom.nocturne.game.role.base.ChasseurRole;
+                boolean isSosieHunter = (deadRole instanceof natjom.nocturne.game.role.base.SosieRole) && (((natjom.nocturne.game.role.base.SosieRole) deadRole).getCopiedRole() instanceof natjom.nocturne.game.role.base.ChasseurRole);
 
                 if ((isHunter || isSosieHunter) && !this.board.hasPowerCancelled(deadId)) {
                     UUID hunterTarget = this.votes.get(deadId);
@@ -256,8 +282,8 @@ public class GameSession {
                     }
                 }
             }
-            List<UUID> lovers = new ArrayList<>();
-            for (ServerPlayer p : this.serverPlayers) {
+            java.util.List<UUID> lovers = new java.util.ArrayList<>();
+            for (net.minecraft.server.level.ServerPlayer p : this.serverPlayers) {
                 if (this.board.getPlayerMarque(p.getUUID()) == natjom.nocturne.game.role.vampire.Marque.AMOUR) {
                     lovers.add(p.getUUID());
                 }
@@ -276,15 +302,15 @@ public class GameSession {
             eliminated.addAll(extraEliminations);
             this.eliminatedPlayers.addAll(eliminated);
 
-            for (ServerPlayer sp : this.serverPlayers) {
-                sp.removeEffect(MobEffects.RESISTANCE);
-                sp.removeEffect(MobEffects.SATURATION);
-                sp.removeEffect(MobEffects.WEAKNESS);
+            for (net.minecraft.server.level.ServerPlayer sp : this.serverPlayers) {
+                sp.removeEffect(net.minecraft.world.effect.MobEffects.RESISTANCE);
+                sp.removeEffect(net.minecraft.world.effect.MobEffects.SATURATION);
+                sp.removeEffect(net.minecraft.world.effect.MobEffects.WEAKNESS);
 
                 for (UUID deadId : eliminated) {
-                    ServerPlayer deadPlayer = sp.level().getServer().getPlayerList().getPlayer(deadId);
+                    net.minecraft.server.level.ServerPlayer deadPlayer = sp.level().getServer().getPlayerList().getPlayer(deadId);
                     if (deadPlayer != null) {
-                        sp.sendSystemMessage(Component.literal("§4" + deadPlayer.getPlainTextName() + " a été éliminé !"));
+                        sp.sendSystemMessage(net.minecraft.network.chat.Component.literal("§4" + deadPlayer.getPlainTextName() + " a été éliminé !"));
 
                         if (sp.getUUID().equals(deadId)) {
                             net.minecraft.server.level.ServerLevel sLevel = deadPlayer.level();
@@ -299,21 +325,20 @@ public class GameSession {
                     }
                 }
             }
-
         }
 
         this.isWaitingForReveal = true;
 
-        net.minecraft.network.chat.MutableComponent revealBtn = Component.literal("§a§l[Révéler mon rôle]")
+        net.minecraft.network.chat.MutableComponent revealBtn = net.minecraft.network.chat.Component.literal("§a§l[Révéler mon rôle]")
                 .withStyle(style -> style.withClickEvent(new net.minecraft.network.chat.ClickEvent.RunCommand("/nocturne _revealRole"))
-                        .withHoverEvent(new net.minecraft.network.chat.HoverEvent.ShowText(Component.literal("§eClique pour révéler ton rôle final au village !"))));
+                        .withHoverEvent(new net.minecraft.network.chat.HoverEvent.ShowText(net.minecraft.network.chat.Component.literal("§eClique pour révéler ton rôle final au village !"))));
 
-        net.minecraft.network.chat.MutableComponent endBtn = Component.literal("§6§l[Afficher les gagnants et l'Historique]")
+        net.minecraft.network.chat.MutableComponent endBtn = net.minecraft.network.chat.Component.literal("§6§l[Afficher les gagnants et l'Historique]")
                 .withStyle(style -> style.withClickEvent(new net.minecraft.network.chat.ClickEvent.RunCommand("/nocturne _endGame"))
-                        .withHoverEvent(new net.minecraft.network.chat.HoverEvent.ShowText(Component.literal("§eClique pour terminer la partie !"))));
+                        .withHoverEvent(new net.minecraft.network.chat.HoverEvent.ShowText(net.minecraft.network.chat.Component.literal("§eClique pour terminer la partie !"))));
 
-        for (ServerPlayer sp : this.serverPlayers) {
-            sp.sendSystemMessage(Component.literal(""));
+        for (net.minecraft.server.level.ServerPlayer sp : this.serverPlayers) {
+            sp.sendSystemMessage(net.minecraft.network.chat.Component.literal(""));
             sp.sendSystemMessage(revealBtn);
             if (sp.getUUID().equals(this.gameMaster)) {
                 sp.sendSystemMessage(endBtn);
