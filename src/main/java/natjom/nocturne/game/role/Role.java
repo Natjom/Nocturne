@@ -38,7 +38,7 @@ public abstract class Role {
                     wolfDied = true;
                 }
             }
-            if (currentRole instanceof VampireRole || currentMarque == Marque.VAMPIRE) {
+            if (currentRole instanceof natjom.nocturne.game.role.vampire.VampireRole || currentRole instanceof natjom.nocturne.game.role.vampire.LeMaitreRole || currentRole instanceof natjom.nocturne.game.role.vampire.LeComteRole || currentMarque == natjom.nocturne.game.role.vampire.Marque.VAMPIRE) {
                 vampireInPlay = true;
                 if (eliminated.contains(p.getUUID())) {
                     vampireDied = true;

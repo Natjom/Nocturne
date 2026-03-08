@@ -15,7 +15,7 @@ public class ImitateurRole extends Role implements VampireExtensionRole {
 
     @Override
     public Component getDisplayName() {
-        return Component.literal("§dImitateur");
+        return Component.literal("§7Imitateur");
     }
 
     @Override

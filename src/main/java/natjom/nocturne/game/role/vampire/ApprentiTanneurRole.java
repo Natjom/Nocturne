@@ -12,7 +12,7 @@ public class ApprentiTanneurRole extends Role implements VampireExtensionRole {
 
     @Override
     public Component getDisplayName() {
-        return Component.literal("§6Apprenti Tanneur");
+        return Component.literal("§bApprenti Tanneur");
     }
 
     @Override

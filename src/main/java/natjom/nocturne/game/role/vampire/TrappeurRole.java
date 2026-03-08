@@ -15,7 +15,7 @@ public class TrappeurRole extends Role implements VampireExtensionRole {
 
     @Override
     public Component getDisplayName() {
-        return Component.literal("§2Trappeur");
+        return Component.literal("§aTrappeur");
     }
 
     @Override

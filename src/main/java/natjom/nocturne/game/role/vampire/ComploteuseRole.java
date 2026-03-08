@@ -15,7 +15,7 @@ public class ComploteuseRole extends Role implements VampireExtensionRole {
 
     @Override
     public Component getDisplayName() {
-        return Component.literal("§5Comploteuse");
+        return Component.literal("§aComploteuse");
     }
 
     @Override

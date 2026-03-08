@@ -10,12 +10,13 @@ import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class RenfieldRole extends Role implements VampireExtensionRole {
 
     @Override
     public Component getDisplayName() {
-        return Component.literal("§aRenfield");
+        return Component.literal("§5Renfield");
     }
 
     @Override
@@ -72,5 +73,29 @@ public class RenfieldRole extends Role implements VampireExtensionRole {
 
             session.getBoard().addPlayerAction(player.getUUID());
         });
+    }
+
+    @Override
+    public boolean didWin(GameSession session, UUID myId, List<UUID> eliminated) {
+        boolean vampireInPlay = false;
+        boolean vampireDied = false;
+
+        for (ServerPlayer p : session.getServerPlayers()) {
+            Role currentRole = session.getBoard().getCurrentRole(p.getUUID());
+            Marque currentMarque = session.getBoard().getPlayerMarque(p.getUUID());
+
+            if (currentRole instanceof VampireRole || currentRole instanceof LeMaitreRole || currentRole instanceof LeComteRole || currentMarque == Marque.VAMPIRE) {
+                vampireInPlay = true;
+                if (eliminated.contains(p.getUUID())) {
+                    vampireDied = true;
+                }
+            }
+        }
+
+        if (vampireInPlay) {
+            return !vampireDied;
+        } else {
+            return super.didWin(session, myId, eliminated);
+        }
     }
 }

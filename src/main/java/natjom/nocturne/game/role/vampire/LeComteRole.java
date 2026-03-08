@@ -15,7 +15,7 @@ public class LeComteRole extends Role implements VampireExtensionRole {
 
     @Override
     public Component getDisplayName() {
-        return Component.literal("§4Le Comte");
+        return Component.literal("§5Le Comte");
     }
 
     @Override
@@ -75,5 +75,24 @@ public class LeComteRole extends Role implements VampireExtensionRole {
 
             session.getBoard().addPlayerAction(player.getUUID());
         });
+    }
+
+    @Override
+    public boolean didWin(natjom.nocturne.game.GameSession session, java.util.UUID myId, java.util.List<java.util.UUID> eliminated) {
+        if (eliminated.contains(myId)) {
+            return false;
+        }
+
+        boolean vampireDied = false;
+        for (java.util.UUID deadId : eliminated) {
+            natjom.nocturne.game.role.Role deadRole = session.getBoard().getCurrentRole(deadId);
+            natjom.nocturne.game.role.vampire.Marque deadMarque = session.getBoard().getPlayerMarque(deadId);
+
+            if (deadRole instanceof natjom.nocturne.game.role.vampire.VampireRole || deadRole instanceof natjom.nocturne.game.role.vampire.LeMaitreRole || deadRole instanceof natjom.nocturne.game.role.vampire.LeComteRole || deadMarque == natjom.nocturne.game.role.vampire.Marque.VAMPIRE) {
+                vampireDied = true;
+            }
+        }
+
+        return !vampireDied;
     }
 }

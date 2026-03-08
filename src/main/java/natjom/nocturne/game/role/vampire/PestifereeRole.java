@@ -16,7 +16,7 @@ public class PestifereeRole extends Role implements VampireExtensionRole {
 
     @Override
     public Component getDisplayName() {
-        return Component.literal("§2Pestiférée");
+        return Component.literal("§aPestiférée");
     }
 
     @Override

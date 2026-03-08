@@ -15,7 +15,7 @@ public class PickpocketRole extends Role implements VampireExtensionRole {
 
     @Override
     public Component getDisplayName() {
-        return Component.literal("§7Pickpocket");
+        return Component.literal("§aPickpocket");
     }
 
     @Override

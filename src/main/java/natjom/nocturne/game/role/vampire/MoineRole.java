@@ -15,7 +15,7 @@ public class MoineRole extends Role implements VampireExtensionRole {
 
     @Override
     public Component getDisplayName() {
-        return Component.literal("§eMoine");
+        return Component.literal("§aMoine");
     }
 
     @Override

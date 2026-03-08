@@ -17,7 +17,7 @@ public class LaChoseRole extends Role implements VampireExtensionRole {
 
     @Override
     public Component getDisplayName() {
-        return Component.literal("§8La Chose");
+        return Component.literal("§aLa Chose");
     }
 
     @Override

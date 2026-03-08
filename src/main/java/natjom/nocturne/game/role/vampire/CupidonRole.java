@@ -15,7 +15,7 @@ public class CupidonRole extends Role implements VampireExtensionRole {
 
     @Override
     public Component getDisplayName() {
-        return Component.literal("§dCupidon");
+        return Component.literal("§aCupidon");
     }
 
     @Override

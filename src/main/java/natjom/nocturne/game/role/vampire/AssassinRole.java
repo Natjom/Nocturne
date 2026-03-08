@@ -16,7 +16,7 @@ public class AssassinRole extends Role implements VampireExtensionRole {
 
     @Override
     public Component getDisplayName() {
-        return Component.literal("§4Assassin");
+        return Component.literal("§6Assassin");
     }
 
     @Override
