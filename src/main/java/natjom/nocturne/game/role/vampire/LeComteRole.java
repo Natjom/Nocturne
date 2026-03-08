@@ -10,23 +10,22 @@ import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
-public class VampireRole extends Role implements VampireExtensionRole {
+public class LeComteRole extends Role implements VampireExtensionRole {
 
     @Override
     public Component getDisplayName() {
-        return Component.literal("§cVampire");
+        return Component.literal("§4Le Comte");
     }
 
     @Override
     public int getNightOrder() {
-        return 2;
+        return 4;
     }
 
     @Override
     public String getSkinTexture() {
-        return "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYWNiYzU2OTk2ZTM3OWE1MmJlZjAzYTY5MjI3Y2I4Y2U0ZmRkY2IwNDMxYTJhNTZjZTcxZjk0OTEwNGZmYmUyOSJ9fX0=";
+        return "";
     }
 
     @Override
@@ -59,41 +58,22 @@ public class VampireRole extends Role implements VampireExtensionRole {
             boolean isTargetVampire = targetRole instanceof VampireRole || targetRole instanceof LeMaitreRole || targetRole instanceof LeComteRole;
 
             if (!target.getUUID().equals(player.getUUID()) && !isTargetVampire && !session.getBoard().isShielded(target.getUUID())) {
-                options.add(MenuIcons.makePlayerHead(target, "§c"));
+                options.add(MenuIcons.makePlayerHead(target, "§4"));
                 validTargets.add(target);
             }
         }
 
-        player.sendSystemMessage(Component.literal("§c[Nuit] Choisis un joueur à mordre pour lui donner la Marque du Vampire."));
+        player.sendSystemMessage(Component.literal("§c[Nuit] Choisis un joueur non-vampire pour lui donner la Marque de la Peur."));
 
-        MenuHelper.openChoiceMenu(player, "§8Mordre un joueur", options, index -> {
+        MenuHelper.openChoiceMenu(player, "§8Placer la Marque de Peur", options, index -> {
             ServerPlayer target = validTargets.get(index);
 
-            session.getBoard().setPlayerMarque(target.getUUID(), Marque.VAMPIRE);
+            session.getBoard().setPlayerMarque(target.getUUID(), Marque.PEUR);
 
-            player.sendSystemMessage(Component.literal("§cTu as placé la Marque du Vampire sur " + target.getPlainTextName() + "."));
-            session.addHistory("Le Vampire (" + player.getPlainTextName() + ") a placé la Marque du Vampire sur " + target.getPlainTextName() + ".");
+            player.sendSystemMessage(Component.literal("§cTu as placé la Marque de la Peur sur " + target.getPlainTextName() + "."));
+            session.addHistory("Le Comte (" + player.getPlainTextName() + ") a placé la Marque de la Peur sur " + target.getPlainTextName() + ".");
 
             session.getBoard().addPlayerAction(player.getUUID());
         });
-    }
-
-    @Override
-    public boolean didWin(GameSession session, UUID myId, List<UUID> eliminated) {
-        if (eliminated.contains(myId)) {
-            return false;
-        }
-
-        boolean vampireDied = false;
-        for (UUID deadId : eliminated) {
-            Role deadRole = session.getBoard().getCurrentRole(deadId);
-            Marque deadMarque = session.getBoard().getPlayerMarque(deadId);
-
-            if (deadRole instanceof VampireRole || deadRole instanceof LeMaitreRole || deadRole instanceof LeComteRole || deadMarque == Marque.VAMPIRE) {
-                vampireDied = true;
-            }
-        }
-
-        return !vampireDied;
     }
 }

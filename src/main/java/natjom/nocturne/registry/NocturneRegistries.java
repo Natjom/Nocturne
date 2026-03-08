@@ -1,10 +1,11 @@
 package natjom.nocturne.registry;
 
+import com.mojang.datafixers.kinds.App;
 import natjom.nocturne.Nocturne;
 import natjom.nocturne.game.role.*;
 import natjom.nocturne.game.role.base.*;
 import natjom.nocturne.game.role.crepuscule.*;
-import natjom.nocturne.game.role.vampire.VampireRole;
+import natjom.nocturne.game.role.vampire.*;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
@@ -46,6 +47,35 @@ public class NocturneRegistries {
     public static final DeferredHolder<Role, Role> VAMPIRE =
             ROLES.register("vampire", VampireRole::new);
 
+    public static final DeferredHolder<Role, Role> LE_MAITRE =
+            ROLES.register("le_maitre", LeMaitreRole::new);
+
+    public static final DeferredHolder<Role, Role> LE_COMTE =
+            ROLES.register("le_comte", LeComteRole::new);
+
+    public static final DeferredHolder<Role, Role> RENFIELD =
+            ROLES.register("renfield", RenfieldRole::new);
+
+    public static final DeferredHolder<Role, Role> PESTIFEREE =
+            ROLES.register("pestiferee", PestifereeRole::new);
+
+    public static final DeferredHolder<Role, Role> CUPITON =
+            ROLES.register("cupiton", CupidonRole::new);
+
+    public static final DeferredHolder<Role, Role> COMPLOTEUSE =
+            ROLES.register("completeuse", ComploteuseRole::new);
+
+    public static final DeferredHolder<Role, Role> MOINE =
+            ROLES.register("moine", MoineRole::new);
+
+    public static final DeferredHolder<Role, Role> ASSASSIN =
+            ROLES.register("assassin", AssassinRole::new);
+
+    public static final DeferredHolder<Role, Role> APPRENTIE_ASSASSIN =
+            ROLES.register("apprentie_assassin", ApprentieAssassinRole::new);
+
+
+
     // ----------------------------------------------------------------- //
 
     public static final DeferredHolder<Role, Role> GUETTEUR =
@@ -66,8 +96,14 @@ public class NocturneRegistries {
     public static final DeferredHolder<Role, Role> SBIRE =
             ROLES.register("sbire", SbireRole::new);
 
+    public static final DeferredHolder<Role, Role> APPRENTI_TANNEUR =
+            ROLES.register("apprenti_tanneur", ApprentiTanneurRole::new);
+
     public static final DeferredHolder<Role, Role> SOEUR =
             ROLES.register("soeur", SoeursRole::new);
+
+    public static final DeferredHolder<Role, Role> LA_CHOSE =
+            ROLES.register("la_chose", LaChoseRole::new);
 
     public static final DeferredHolder<Role, Role> VOYANTE =
             ROLES.register("voyante", VoyanteRole::new);
@@ -78,11 +114,17 @@ public class NocturneRegistries {
     public static final DeferredHolder<Role, Role> EXORCISTE =
             ROLES.register("exorciste", ExorcisteRole::new);
 
+    public static final DeferredHolder<Role, Role> TRAPPEUR =
+            ROLES.register("trappeur", TrappeurRole::new);
+
     public static final DeferredHolder<Role, Role> VOLEUR =
             ROLES.register("voleur", VoleurRole::new);
 
     public static final DeferredHolder<Role, Role> SORCIERE =
             ROLES.register("sorciere", SorciereRole::new);
+
+    public static final DeferredHolder<Role, Role> PICKPOCKET =
+            ROLES.register("pickpocket", PickpocketRole::new);
 
     public static final DeferredHolder<Role, Role> NOISEUSE =
             ROLES.register("noiseuse", NoiseuseRole::new);
@@ -92,6 +134,9 @@ public class NocturneRegistries {
 
     public static final DeferredHolder<Role, Role> COMPTEUSE =
             ROLES.register("compteuse", CompteuseRole::new);
+
+    public static final DeferredHolder<Role, Role> FARFADET =
+            ROLES.register("farfadet", FarfadetRole::new);
 
     public static final DeferredHolder<Role, Role> SOULARD =
             ROLES.register("soulard", SoulardRole::new);

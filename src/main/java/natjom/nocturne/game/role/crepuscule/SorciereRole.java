@@ -42,7 +42,6 @@ public class SorciereRole extends Role {
 
         player.sendSystemMessage(Component.literal("§c[Nuit] Choisis d'abord une carte du centre à regarder."));
 
-        // Premier menu : Le centre
         MenuHelper.openChoiceMenu(player, "§81. Regarder le centre", centerOptions, centerIndex -> {
             Role seenRole = session.getBoard().getCenterCard(centerIndex);
             player.sendSystemMessage(Component.literal("§dLa carte du centre n°" + (centerIndex + 1) + " est : §l" + seenRole.getDisplayName().getString()));
