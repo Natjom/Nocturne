@@ -256,6 +256,23 @@ public class GameSession {
                     }
                 }
             }
+            List<UUID> lovers = new ArrayList<>();
+            for (ServerPlayer p : this.serverPlayers) {
+                if (this.board.getPlayerMarque(p.getUUID()) == natjom.nocturne.game.role.vampire.Marque.AMOUR) {
+                    lovers.add(p.getUUID());
+                }
+            }
+
+            if (lovers.size() == 2) {
+                if (eliminated.contains(lovers.get(0)) || eliminated.contains(lovers.get(1)) || extraEliminations.contains(lovers.get(0)) || extraEliminations.contains(lovers.get(1))) {
+                    if (!eliminated.contains(lovers.get(0)) && !extraEliminations.contains(lovers.get(0))) {
+                        extraEliminations.add(lovers.get(0));
+                    }
+                    if (!eliminated.contains(lovers.get(1)) && !extraEliminations.contains(lovers.get(1))) {
+                        extraEliminations.add(lovers.get(1));
+                    }
+                }
+            }
             eliminated.addAll(extraEliminations);
             this.eliminatedPlayers.addAll(eliminated);
 
@@ -282,6 +299,7 @@ public class GameSession {
                     }
                 }
             }
+
         }
 
         this.isWaitingForReveal = true;
@@ -343,16 +361,57 @@ public class GameSession {
 
             boolean won;
 
-            if (artifact == Artefact.GRIFFE_LOUP_GAROU) {
-                won = new LoupRole().didWin(this, sp.getUUID(), this.eliminatedPlayers);
-            } else if (artifact == Artefact.MARQUE_VILLAGEOIS) {
-                won = new VillageoisRole().didWin(this, sp.getUUID(), this.eliminatedPlayers);
-            } else if (artifact == Artefact.GOURDIN_TANNEUR) {
-                won = new TanneurRole().didWin(this, sp.getUUID(), this.eliminatedPlayers);
-            } else if (marque == Marque.VAMPIRE) {
-                won = new VampireRole().didWin(this, sp.getUUID(), this.eliminatedPlayers);
+            if (artifact == natjom.nocturne.game.role.crepuscule.Artefact.GRIFFE_LOUP_GAROU) {
+                won = new natjom.nocturne.game.role.base.LoupRole().didWin(this, sp.getUUID(), this.eliminatedPlayers);
+            } else if (artifact == natjom.nocturne.game.role.crepuscule.Artefact.MARQUE_VILLAGEOIS) {
+                won = new natjom.nocturne.game.role.base.VillageoisRole().didWin(this, sp.getUUID(), this.eliminatedPlayers);
+            } else if (artifact == natjom.nocturne.game.role.crepuscule.Artefact.GOURDIN_TANNEUR) {
+                won = new natjom.nocturne.game.role.base.TanneurRole().didWin(this, sp.getUUID(), this.eliminatedPlayers);
+            } else if (marque == natjom.nocturne.game.role.vampire.Marque.VAMPIRE) {
+                won = new natjom.nocturne.game.role.vampire.VampireRole().didWin(this, sp.getUUID(), this.eliminatedPlayers);
             } else {
                 won = finalRole.didWin(this, sp.getUUID(), this.eliminatedPlayers);
+            }
+
+            if (marque == natjom.nocturne.game.role.vampire.Marque.TRAITRE) {
+                boolean isWolf = finalRole instanceof natjom.nocturne.game.role.base.LoupRole || artifact == natjom.nocturne.game.role.crepuscule.Artefact.GRIFFE_LOUP_GAROU;
+                boolean isVamp = finalRole instanceof natjom.nocturne.game.role.vampire.VampireRole || finalRole instanceof natjom.nocturne.game.role.vampire.LeMaitreRole || finalRole instanceof natjom.nocturne.game.role.vampire.LeComteRole || marque == natjom.nocturne.game.role.vampire.Marque.VAMPIRE;
+                boolean isTanner = finalRole instanceof natjom.nocturne.game.role.base.TanneurRole || artifact == natjom.nocturne.game.role.crepuscule.Artefact.GOURDIN_TANNEUR;
+
+                int teamCount = 0;
+                boolean teamMemberDied = false;
+
+                for (ServerPlayer p : this.serverPlayers) {
+                    Role pRole = this.board.getCurrentRole(p.getUUID());
+                    natjom.nocturne.game.role.crepuscule.Artefact pArt = this.board.getArtifact(p.getUUID());
+                    natjom.nocturne.game.role.vampire.Marque pMarq = this.board.getPlayerMarque(p.getUUID());
+
+                    boolean pIsWolf = pRole instanceof natjom.nocturne.game.role.base.LoupRole || pArt == natjom.nocturne.game.role.crepuscule.Artefact.GRIFFE_LOUP_GAROU;
+                    boolean pIsVamp = pRole instanceof natjom.nocturne.game.role.vampire.VampireRole || pRole instanceof natjom.nocturne.game.role.vampire.LeMaitreRole || pRole instanceof natjom.nocturne.game.role.vampire.LeComteRole || pMarq == natjom.nocturne.game.role.vampire.Marque.VAMPIRE;
+                    boolean pIsTanner = pRole instanceof natjom.nocturne.game.role.base.TanneurRole || pArt == natjom.nocturne.game.role.crepuscule.Artefact.GOURDIN_TANNEUR;
+
+                    boolean sameTeam = false;
+                    if (isWolf && pIsWolf) sameTeam = true;
+                    else if (isVamp && pIsVamp) sameTeam = true;
+                    else if (isTanner && pIsTanner) sameTeam = true;
+                    else if (!isWolf && !isVamp && !isTanner && !pIsWolf && !pIsVamp && !pIsTanner) sameTeam = true;
+
+                    if (sameTeam) {
+                        teamCount++;
+                        if (this.eliminatedPlayers.contains(p.getUUID()) && !p.getUUID().equals(sp.getUUID())) {
+                            teamMemberDied = true;
+                        }
+                    }
+                }
+
+                if (teamCount > 1) {
+                    won = teamMemberDied && !this.eliminatedPlayers.contains(sp.getUUID());
+                }
+            }
+
+            UUID myVoteTarget = this.votes.get(sp.getUUID());
+            if (myVoteTarget != null && this.board.getPlayerMarque(myVoteTarget) == natjom.nocturne.game.role.vampire.Marque.PESTE) {
+                won = false;
             }
 
             String artifactInfo = artifact != null ? " §6(" + artifact.getDisplayName() + "§6)" : "";
@@ -361,11 +420,11 @@ public class GameSession {
                     : "";
 
             if (won) {
-                sp.sendSystemMessage(net.minecraft.network.chat.Component.literal("§a§lVICTOIRE ! §r§aTu as gagné."));
+                sp.sendSystemMessage(Component.literal("§a§lVICTOIRE ! §r§aTu as gagné."));
                 this.addHistory(sp.getPlainTextName() + " a GAGNÉ avec le rôle " + finalRole.getDisplayName().getString() + artifactInfo + marqueInfo);
                 sp.playSound(net.minecraft.sounds.SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, 1.0F, 1.0F);
             } else {
-                sp.sendSystemMessage(net.minecraft.network.chat.Component.literal("§c§lDÉFAITE ! §r§cTu as perdu."));
+                sp.sendSystemMessage(Component.literal("§c§lDÉFAITE ! §r§cTu as perdu."));
                 this.addHistory(sp.getPlainTextName() + " a PERDU avec le rôle " + finalRole.getDisplayName().getString() + artifactInfo + marqueInfo);
                 sp.playSound(net.minecraft.sounds.SoundEvents.VILLAGER_NO, 1.0F, 1.0F);
             }

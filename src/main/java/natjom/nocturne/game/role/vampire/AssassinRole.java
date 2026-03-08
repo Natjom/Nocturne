@@ -10,6 +10,7 @@ import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class AssassinRole extends Role implements VampireExtensionRole {
 
@@ -57,5 +58,20 @@ public class AssassinRole extends Role implements VampireExtensionRole {
 
             session.getBoard().addPlayerAction(player.getUUID());
         });
+    }
+
+    @Override
+    public boolean didWin(GameSession session, UUID myId, List<UUID> eliminated) {
+        if (eliminated.contains(myId)) {
+            return false;
+        }
+
+        for (ServerPlayer p : session.getServerPlayers()) {
+            if (session.getBoard().getPlayerMarque(p.getUUID()) == Marque.ASSASSIN) {
+                return eliminated.contains(p.getUUID());
+            }
+        }
+
+        return false;
     }
 }

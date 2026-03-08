@@ -115,12 +115,24 @@ public class NightCycleManager {
         for (ServerPlayer player : session.getServerPlayers()) {
             Role initialRole = session.getBoard().getInitialRole(player.getUUID());
 
+            boolean isMyTurn = false;
+
             if (currentRole.getClass() == natjom.nocturne.game.role.base.LoupRole.class) {
                 if (initialRole instanceof natjom.nocturne.game.role.base.LoupRole && !(initialRole instanceof natjom.nocturne.game.role.crepuscule.LoupReveurRole)) {
-                    currentRole.onWakeUp(player, session);
+                    isMyTurn = true;
                 }
             } else if (initialRole == currentRole) {
-                currentRole.onWakeUp(player, session);
+                isMyTurn = true;
+            }
+
+            if (isMyTurn) {
+                natjom.nocturne.game.role.vampire.Marque myMarque = session.getBoard().getPlayerMarque(player.getUUID());
+
+                if (currentRole.getNightOrder() >= 12 && myMarque == natjom.nocturne.game.role.vampire.Marque.PEUR) {
+                    player.sendSystemMessage(net.minecraft.network.chat.Component.literal("§9Tu es complètement paralysé par la Marque de la Peur... Tu passes ton tour cette nuit."));
+                } else {
+                    currentRole.onWakeUp(player, session);
+                }
             }
         }
     }
