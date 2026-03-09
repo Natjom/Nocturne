@@ -2,6 +2,7 @@ package natjom.nocturne.game;
 
 import natjom.nocturne.game.role.Role;
 import natjom.nocturne.game.role.crepuscule.Artefact;
+import natjom.nocturne.game.role.vampire.Marque;
 
 import java.util.*;
 
@@ -14,9 +15,19 @@ public class GameBoard {
     private final Set<UUID> playersWhoActed = new HashSet<>();
     private final List<UUID> circleOrder = new ArrayList<>();
     private final Map<UUID, Artefact> playerArtifacts = new HashMap<>();
+    private final Map<UUID, Marque> playerMarques = new HashMap<>();
 
     public void setup(List<UUID> players, List<Role> deck) {
         Collections.shuffle(deck);
+
+        initialRoles.clear();
+        shieldedCards.clear();
+        revealedCards.clear();
+        playersWhoActed.clear();
+        playerArtifacts.clear();
+        playerMarques.clear();
+        circleOrder.clear();
+        circleOrder.addAll(players);
 
         for (int i = 0; i < 3; i++) {
             centerCards.add(deck.removeFirst());
@@ -24,17 +35,12 @@ public class GameBoard {
 
         for (UUID player : players) {
             Role assignedRole = deck.removeFirst();
-            circleOrder.clear();
-            circleOrder.addAll(players);
             initialRoles.put(player, assignedRole);
             currentRoles.put(player, assignedRole);
+
+            this.playerMarques.put(player, Marque.CLARTE);
         }
 
-        initialRoles.clear();
-        shieldedCards.clear();
-        revealedCards.clear();
-        playersWhoActed.clear();
-        playerArtifacts.clear();
         initialRoles.putAll(currentRoles);
     }
 
@@ -107,4 +113,32 @@ public class GameBoard {
         return artefact != null && artefact.isCancelsPowers();
     }
 
+    public void setPlayerMarque(UUID player, Marque marque) {
+        this.playerMarques.put(player, marque);
+    }
+
+    public Marque getPlayerMarque(UUID player) {
+        return this.playerMarques.get(player);
+    }
+
+    public void swapPlayerMarques(UUID player1, UUID player2) {
+        Marque m1 = this.getPlayerMarque(player1);
+        Marque m2 = this.getPlayerMarque(player2);
+        this.playerMarques.put(player1, m2);
+        this.playerMarques.put(player2, m1);
+    }
+
+    public UUID getLeftNeighbor(UUID playerId) {
+        int index = this.circleOrder.indexOf(playerId);
+        if (index == -1) return null;
+        int leftIndex = (index - 1 + this.circleOrder.size()) % this.circleOrder.size();
+        return this.circleOrder.get(leftIndex);
+    }
+
+    public UUID getRightNeighbor(UUID playerId) {
+        int index = this.circleOrder.indexOf(playerId);
+        if (index == -1) return null;
+        int rightIndex = (index + 1) % this.circleOrder.size();
+        return this.circleOrder.get(rightIndex);
+    }
 }

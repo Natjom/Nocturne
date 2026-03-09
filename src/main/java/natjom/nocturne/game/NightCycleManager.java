@@ -17,6 +17,8 @@ public class NightCycleManager {
     private int timer = 0;
     private int currentMaxTime = 1;
     private final ServerBossEvent nightBossBar;
+    private boolean hasCheckedMarques = false;
+    private boolean hasCheckedLovers = false;
 
     public NightCycleManager(GameSession session) {
         this.session = session;
@@ -79,6 +81,57 @@ public class NightCycleManager {
         }
 
         Role currentRole = wakeUpOrder.get(currentPhaseIndex);
+
+        boolean hasVampireDLC = this.session.getBoard().getAllRolesInGame().stream()
+                .anyMatch(r -> r instanceof natjom.nocturne.game.role.vampire.VampireExtensionRole);
+
+        if (hasVampireDLC && !this.hasCheckedMarques && currentRole.getNightOrder() >= 12) {
+            this.hasCheckedMarques = true;
+            this.currentPhaseIndex--;
+
+            this.currentMaxTime = 100;
+            this.timer = this.currentMaxTime;
+            this.nightBossBar.setName(Component.literal("§5§lPhase de lecture des Marques"));
+
+            for (net.minecraft.server.level.ServerPlayer sp : this.session.getServerPlayers()) {
+                natjom.nocturne.game.role.vampire.Marque myMarque = this.session.getBoard().getPlayerMarque(sp.getUUID());
+
+                if (myMarque != null) {
+                    sp.sendSystemMessage(net.minecraft.network.chat.Component.literal("§8================================="));
+                    sp.sendSystemMessage(net.minecraft.network.chat.Component.literal("§c[Crépuscule] Il est temps de regarder ta Marque."));
+                    sp.sendSystemMessage(net.minecraft.network.chat.Component.literal("§eTa marque actuelle est : §l" + myMarque.getDisplayName().getString()));
+                    sp.sendSystemMessage(net.minecraft.network.chat.Component.literal("§8================================="));
+                }
+            }
+            return;
+        }
+
+        if (hasVampireDLC && this.hasCheckedMarques && !this.hasCheckedLovers && currentRole.getNightOrder() >= 12) {
+            this.hasCheckedLovers = true;
+            this.currentPhaseIndex--;
+
+            List<ServerPlayer> lovers = new ArrayList<>();
+            for (ServerPlayer sp : this.session.getServerPlayers()) {
+                if (this.session.getBoard().getPlayerMarque(sp.getUUID()) == natjom.nocturne.game.role.vampire.Marque.AMOUR) {
+                    lovers.add(sp);
+                }
+            }
+
+            if (lovers.size() == 2) {
+                this.currentMaxTime = 100;
+                this.timer = this.currentMaxTime;
+                this.nightBossBar.setName(Component.literal("§d§lPhase des Amoureux"));
+
+                ServerPlayer lover1 = lovers.get(0);
+                ServerPlayer lover2 = lovers.get(1);
+
+                lover1.sendSystemMessage(Component.literal("§d[Amour] Ton/Ta partenaire est : " + lover2.getPlainTextName()));
+                lover2.sendSystemMessage(Component.literal("§d[Amour] Ton/Ta partenaire est : " + lover1.getPlainTextName()));
+
+                return;
+            }
+        }
+
         this.currentMaxTime = currentRole.getActionDuration();
         this.timer = this.currentMaxTime;
 
@@ -89,12 +142,24 @@ public class NightCycleManager {
         for (ServerPlayer player : session.getServerPlayers()) {
             Role initialRole = session.getBoard().getInitialRole(player.getUUID());
 
+            boolean isMyTurn = false;
+
             if (currentRole.getClass() == natjom.nocturne.game.role.base.LoupRole.class) {
                 if (initialRole instanceof natjom.nocturne.game.role.base.LoupRole && !(initialRole instanceof natjom.nocturne.game.role.crepuscule.LoupReveurRole)) {
-                    currentRole.onWakeUp(player, session);
+                    isMyTurn = true;
                 }
             } else if (initialRole == currentRole) {
-                currentRole.onWakeUp(player, session);
+                isMyTurn = true;
+            }
+
+            if (isMyTurn) {
+                natjom.nocturne.game.role.vampire.Marque myMarque = session.getBoard().getPlayerMarque(player.getUUID());
+
+                if (currentRole.getNightOrder() >= 12 && myMarque == natjom.nocturne.game.role.vampire.Marque.PEUR) {
+                    player.sendSystemMessage(net.minecraft.network.chat.Component.literal("§9Tu es complètement paralysé par la Marque de la Peur... Tu passes ton tour cette nuit."));
+                } else {
+                    currentRole.onWakeUp(player, session);
+                }
             }
         }
     }

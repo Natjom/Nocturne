@@ -1,11 +1,12 @@
 package natjom.nocturne.game;
 
-import natjom.nocturne.game.role.base.ChasseurRole;
+import natjom.nocturne.game.role.base.*;
 import natjom.nocturne.game.role.Role;
-import natjom.nocturne.game.role.base.SosieRole;
 import natjom.nocturne.game.role.crepuscule.Artefact;
 import natjom.nocturne.game.role.crepuscule.PoliticienRole;
 import natjom.nocturne.game.role.crepuscule.ProtecteurRole;
+import natjom.nocturne.game.role.vampire.Marque;
+import natjom.nocturne.game.role.vampire.VampireRole;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerBossEvent;
@@ -186,47 +187,92 @@ public class GameSession {
     private void resolveVotes() {
         this.currentState = GameState.END;
 
-        Map<UUID, Integer> voteCounts = new HashMap<>();
+        java.util.Map<UUID, Integer> voteCounts = new java.util.HashMap<>();
 
         for (UUID target : this.votes.values()) {
             voteCounts.put(target, voteCounts.getOrDefault(target, 0) + 1);
         }
 
-        Set<UUID> protectedPlayers = new HashSet<>();
-        for (ServerPlayer sp : this.serverPlayers) {
-            Role role = this.board.getCurrentRole(sp.getUUID());
+        java.util.Set<UUID> protectedPlayers = new java.util.HashSet<>();
+        for (net.minecraft.server.level.ServerPlayer sp : this.serverPlayers) {
+            natjom.nocturne.game.role.Role role = this.board.getCurrentRole(sp.getUUID());
 
             if (!this.board.hasPowerCancelled(sp.getUUID())) {
-            if (role instanceof PoliticienRole || (role instanceof SosieRole && ((SosieRole) role).getCopiedRole() instanceof PoliticienRole)) {
-                protectedPlayers.add(sp.getUUID());
-            }
-
-            if (role instanceof ProtecteurRole || (role instanceof SosieRole && ((SosieRole) role).getCopiedRole() instanceof ProtecteurRole)) {
-                UUID protectedByBodyguard = this.votes.get(sp.getUUID());
-                if (protectedByBodyguard != null) {
-                    protectedPlayers.add(protectedByBodyguard);
+                if (role instanceof natjom.nocturne.game.role.crepuscule.PoliticienRole || (role instanceof natjom.nocturne.game.role.base.SosieRole && ((natjom.nocturne.game.role.base.SosieRole) role).getCopiedRole() instanceof natjom.nocturne.game.role.crepuscule.PoliticienRole)) {
+                    protectedPlayers.add(sp.getUUID());
                 }
-            }
+
+                if (role instanceof natjom.nocturne.game.role.crepuscule.ProtecteurRole || (role instanceof natjom.nocturne.game.role.base.SosieRole && ((natjom.nocturne.game.role.base.SosieRole) role).getCopiedRole() instanceof natjom.nocturne.game.role.crepuscule.ProtecteurRole)) {
+                    UUID protectedByBodyguard = this.votes.get(sp.getUUID());
+                    if (protectedByBodyguard != null) {
+                        protectedPlayers.add(protectedByBodyguard);
+                    }
+                }
+
+                boolean isMaitre = role instanceof natjom.nocturne.game.role.vampire.LeMaitreRole || (role instanceof natjom.nocturne.game.role.base.SosieRole && ((natjom.nocturne.game.role.base.SosieRole) role).getCopiedRole() instanceof natjom.nocturne.game.role.vampire.LeMaitreRole);
+                natjom.nocturne.game.role.crepuscule.Artefact spArt = this.board.getArtifact(sp.getUUID());
+                natjom.nocturne.game.role.vampire.Marque spMarque = this.board.getPlayerMarque(sp.getUUID());
+
+                if (spArt != null && (spArt == natjom.nocturne.game.role.crepuscule.Artefact.GRIFFE_LOUP_GAROU || spArt == natjom.nocturne.game.role.crepuscule.Artefact.MARQUE_VILLAGEOIS || spArt == natjom.nocturne.game.role.crepuscule.Artefact.GOURDIN_TANNEUR)) {
+                    isMaitre = false;
+                } else if (spMarque == natjom.nocturne.game.role.vampire.Marque.VAMPIRE || spMarque == natjom.nocturne.game.role.vampire.Marque.ASSASSIN || spMarque == natjom.nocturne.game.role.vampire.Marque.TRAITRE) {
+                    isMaitre = false;
+                }
+
+                if (isMaitre) {
+                    boolean savedByVampire = false;
+                    for (java.util.Map.Entry<UUID, UUID> voteEntry : this.votes.entrySet()) {
+                        UUID voterId = voteEntry.getKey();
+                        UUID votedTarget = voteEntry.getValue();
+
+                        if (votedTarget.equals(sp.getUUID()) && !voterId.equals(sp.getUUID())) {
+                            natjom.nocturne.game.role.Role voterRole = this.board.getCurrentRole(voterId);
+                            natjom.nocturne.game.role.vampire.Marque voterMarque = this.board.getPlayerMarque(voterId);
+                            natjom.nocturne.game.role.crepuscule.Artefact voterArt = this.board.getArtifact(voterId);
+
+                            boolean isVampire = false;
+
+                            if (voterArt != null && (voterArt == natjom.nocturne.game.role.crepuscule.Artefact.GRIFFE_LOUP_GAROU || voterArt == natjom.nocturne.game.role.crepuscule.Artefact.MARQUE_VILLAGEOIS || voterArt == natjom.nocturne.game.role.crepuscule.Artefact.GOURDIN_TANNEUR)) {
+                                isVampire = false;
+                            } else if (voterMarque == natjom.nocturne.game.role.vampire.Marque.VAMPIRE) {
+                                isVampire = true;
+                            } else if (voterMarque == natjom.nocturne.game.role.vampire.Marque.ASSASSIN || voterMarque == natjom.nocturne.game.role.vampire.Marque.TRAITRE) {
+                                isVampire = false;
+                            } else {
+                                isVampire = voterRole instanceof natjom.nocturne.game.role.vampire.VampireRole || voterRole instanceof natjom.nocturne.game.role.vampire.LeComteRole;
+                            }
+
+                            if (isVampire) {
+                                savedByVampire = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (savedByVampire) {
+                        protectedPlayers.add(sp.getUUID());
+                    }
+                }
             }
         }
 
-        List<Integer> distinctVoteCounts = voteCounts.values().stream()
+        java.util.List<Integer> distinctVoteCounts = voteCounts.values().stream()
                 .distinct()
-                .sorted(Comparator.reverseOrder())
+                .sorted(java.util.Comparator.reverseOrder())
                 .toList();
 
-        List<UUID> eliminated = new ArrayList<>();
+        java.util.List<UUID> eliminated = new java.util.ArrayList<>();
         for (int count : distinctVoteCounts) {
             if (count <= 1) break;
 
-            List<UUID> candidates = new ArrayList<>();
-            for (Map.Entry<UUID, Integer> entry : voteCounts.entrySet()) {
+            java.util.List<UUID> candidates = new java.util.ArrayList<>();
+            for (java.util.Map.Entry<UUID, Integer> entry : voteCounts.entrySet()) {
                 if (entry.getValue() == count) {
                     candidates.add(entry.getKey());
                 }
             }
 
-            List<UUID> unprotectedCandidates = candidates.stream()
+            java.util.List<UUID> unprotectedCandidates = candidates.stream()
                     .filter(id -> !protectedPlayers.contains(id))
                     .toList();
 
@@ -237,16 +283,16 @@ public class GameSession {
         }
 
         if (eliminated.isEmpty()) {
-            for (ServerPlayer sp : this.serverPlayers) {
-                sp.sendSystemMessage(Component.literal("§eÉgalité parfaite. Personne n'est éliminé !"));
+            for (net.minecraft.server.level.ServerPlayer sp : this.serverPlayers) {
+                sp.sendSystemMessage(net.minecraft.network.chat.Component.literal("§eÉgalité parfaite. Personne n'est éliminé !"));
             }
         } else {
-            List<UUID> extraEliminations = new ArrayList<>();
+            java.util.List<UUID> extraEliminations = new java.util.ArrayList<>();
             for (UUID deadId : eliminated) {
-                Role deadRole = this.board.getCurrentRole(deadId);
+                natjom.nocturne.game.role.Role deadRole = this.board.getCurrentRole(deadId);
 
-                boolean isHunter = deadRole instanceof ChasseurRole;
-                boolean isSosieHunter = (deadRole instanceof SosieRole) && (((SosieRole) deadRole).getCopiedRole() instanceof ChasseurRole);
+                boolean isHunter = deadRole instanceof natjom.nocturne.game.role.base.ChasseurRole;
+                boolean isSosieHunter = (deadRole instanceof natjom.nocturne.game.role.base.SosieRole) && (((natjom.nocturne.game.role.base.SosieRole) deadRole).getCopiedRole() instanceof natjom.nocturne.game.role.base.ChasseurRole);
 
                 if ((isHunter || isSosieHunter) && !this.board.hasPowerCancelled(deadId)) {
                     UUID hunterTarget = this.votes.get(deadId);
@@ -255,21 +301,38 @@ public class GameSession {
                     }
                 }
             }
+            java.util.List<UUID> lovers = new java.util.ArrayList<>();
+            for (net.minecraft.server.level.ServerPlayer p : this.serverPlayers) {
+                if (this.board.getPlayerMarque(p.getUUID()) == natjom.nocturne.game.role.vampire.Marque.AMOUR) {
+                    lovers.add(p.getUUID());
+                }
+            }
+
+            if (lovers.size() == 2) {
+                if (eliminated.contains(lovers.get(0)) || eliminated.contains(lovers.get(1)) || extraEliminations.contains(lovers.get(0)) || extraEliminations.contains(lovers.get(1))) {
+                    if (!eliminated.contains(lovers.get(0)) && !extraEliminations.contains(lovers.get(0))) {
+                        extraEliminations.add(lovers.get(0));
+                    }
+                    if (!eliminated.contains(lovers.get(1)) && !extraEliminations.contains(lovers.get(1))) {
+                        extraEliminations.add(lovers.get(1));
+                    }
+                }
+            }
             eliminated.addAll(extraEliminations);
             this.eliminatedPlayers.addAll(eliminated);
 
-            for (ServerPlayer sp : this.serverPlayers) {
-                sp.removeEffect(MobEffects.RESISTANCE);
-                sp.removeEffect(MobEffects.SATURATION);
-                sp.removeEffect(MobEffects.WEAKNESS);
+            for (net.minecraft.server.level.ServerPlayer sp : this.serverPlayers) {
+                sp.removeEffect(net.minecraft.world.effect.MobEffects.RESISTANCE);
+                sp.removeEffect(net.minecraft.world.effect.MobEffects.SATURATION);
+                sp.removeEffect(net.minecraft.world.effect.MobEffects.WEAKNESS);
 
                 for (UUID deadId : eliminated) {
-                    ServerPlayer deadPlayer = sp.level().getServer().getPlayerList().getPlayer(deadId);
+                    net.minecraft.server.level.ServerPlayer deadPlayer = sp.level().getServer().getPlayerList().getPlayer(deadId);
                     if (deadPlayer != null) {
-                        sp.sendSystemMessage(Component.literal("§4" + deadPlayer.getPlainTextName() + " a été éliminé !"));
+                        sp.sendSystemMessage(net.minecraft.network.chat.Component.literal("§4" + deadPlayer.getPlainTextName() + " a été éliminé !"));
 
                         if (sp.getUUID().equals(deadId)) {
-                            net.minecraft.server.level.ServerLevel sLevel = deadPlayer.level();
+                            net.minecraft.server.level.ServerLevel sLevel = (net.minecraft.server.level.ServerLevel) deadPlayer.level();
                             net.minecraft.world.entity.LightningBolt lightning = net.minecraft.world.entity.EntityType.LIGHTNING_BOLT.create(sLevel, net.minecraft.world.entity.EntitySpawnReason.COMMAND);
 
                             if (lightning != null) {
@@ -285,16 +348,16 @@ public class GameSession {
 
         this.isWaitingForReveal = true;
 
-        net.minecraft.network.chat.MutableComponent revealBtn = Component.literal("§a§l[Révéler mon rôle]")
+        net.minecraft.network.chat.MutableComponent revealBtn = net.minecraft.network.chat.Component.literal("§a§l[Révéler mon rôle]")
                 .withStyle(style -> style.withClickEvent(new net.minecraft.network.chat.ClickEvent.RunCommand("/nocturne _revealRole"))
-                        .withHoverEvent(new net.minecraft.network.chat.HoverEvent.ShowText(Component.literal("§eClique pour révéler ton rôle final au village !"))));
+                        .withHoverEvent(new net.minecraft.network.chat.HoverEvent.ShowText(net.minecraft.network.chat.Component.literal("§eClique pour révéler ton rôle final au village !"))));
 
-        net.minecraft.network.chat.MutableComponent endBtn = Component.literal("§6§l[Afficher les gagnants et l'Historique]")
+        net.minecraft.network.chat.MutableComponent endBtn = net.minecraft.network.chat.Component.literal("§6§l[Afficher les gagnants et l'Historique]")
                 .withStyle(style -> style.withClickEvent(new net.minecraft.network.chat.ClickEvent.RunCommand("/nocturne _endGame"))
-                        .withHoverEvent(new net.minecraft.network.chat.HoverEvent.ShowText(Component.literal("§eClique pour terminer la partie !"))));
+                        .withHoverEvent(new net.minecraft.network.chat.HoverEvent.ShowText(net.minecraft.network.chat.Component.literal("§eClique pour terminer la partie !"))));
 
-        for (ServerPlayer sp : this.serverPlayers) {
-            sp.sendSystemMessage(Component.literal(""));
+        for (net.minecraft.server.level.ServerPlayer sp : this.serverPlayers) {
+            sp.sendSystemMessage(net.minecraft.network.chat.Component.literal(""));
             sp.sendSystemMessage(revealBtn);
             if (sp.getUUID().equals(this.gameMaster)) {
                 sp.sendSystemMessage(endBtn);
@@ -309,10 +372,15 @@ public class GameSession {
 
         this.revealedPlayers.add(player.getUUID());
         Role finalRole = this.board.getCurrentRole(player.getUUID());
+        natjom.nocturne.game.role.vampire.Marque marque = this.board.getPlayerMarque(player.getUUID());
+
+        String marqueInfo = (marque != null && marque != natjom.nocturne.game.role.vampire.Marque.CLARTE)
+                ? " §r§7[" + marque.getDisplayName().getString() + "§7]"
+                : "";
 
         for (ServerPlayer sp : this.serverPlayers) {
-            sp.sendSystemMessage(Component.literal("§d" + player.getPlainTextName() + " révèle son rôle : §l" + finalRole.getDisplayName().getString()));
-            sp.playSound(SoundEvents.EXPERIENCE_ORB_PICKUP, 1.0F, 1.0F);
+            sp.sendSystemMessage(Component.literal("§d" + player.getPlainTextName() + " révèle son rôle : §l" + finalRole.getDisplayName().getString() + marqueInfo));
+            sp.playSound(net.minecraft.sounds.SoundEvents.EXPERIENCE_ORB_PICKUP, 1.0F, 1.0F);
         }
 
         if (this.compoObjective != null && !this.serverPlayers.isEmpty()) {
@@ -330,9 +398,10 @@ public class GameSession {
         this.isWaitingForReveal = false;
         this.addHistory("§e--- Résultats ---");
 
-        for (ServerPlayer sp : this.serverPlayers) {
-            Role finalRole = this.board.getCurrentRole(sp.getUUID());
-            natjom.nocturne.game.role.crepuscule.Artefact artifact = this.board.getArtifact(sp.getUUID());
+        for (net.minecraft.server.level.ServerPlayer sp : this.serverPlayers) {
+            natjom.nocturne.game.role.Role finalRole = this.board.getCurrentRole(sp.getUUID());
+            Artefact artifact = this.board.getArtifact(sp.getUUID());
+            Marque marque = this.board.getPlayerMarque(sp.getUUID());
 
             boolean won;
 
@@ -342,20 +411,66 @@ public class GameSession {
                 won = new natjom.nocturne.game.role.base.VillageoisRole().didWin(this, sp.getUUID(), this.eliminatedPlayers);
             } else if (artifact == natjom.nocturne.game.role.crepuscule.Artefact.GOURDIN_TANNEUR) {
                 won = new natjom.nocturne.game.role.base.TanneurRole().didWin(this, sp.getUUID(), this.eliminatedPlayers);
+            } else if (marque == natjom.nocturne.game.role.vampire.Marque.VAMPIRE) {
+                won = new natjom.nocturne.game.role.vampire.VampireRole().didWin(this, sp.getUUID(), this.eliminatedPlayers);
             } else {
                 won = finalRole.didWin(this, sp.getUUID(), this.eliminatedPlayers);
             }
 
+            if (marque == natjom.nocturne.game.role.vampire.Marque.TRAITRE) {
+                boolean isWolf = finalRole instanceof natjom.nocturne.game.role.base.LoupRole || artifact == natjom.nocturne.game.role.crepuscule.Artefact.GRIFFE_LOUP_GAROU;
+                boolean isVamp = finalRole instanceof natjom.nocturne.game.role.vampire.VampireRole || finalRole instanceof natjom.nocturne.game.role.vampire.LeMaitreRole || finalRole instanceof natjom.nocturne.game.role.vampire.LeComteRole || marque == natjom.nocturne.game.role.vampire.Marque.VAMPIRE;
+                boolean isTanner = finalRole instanceof natjom.nocturne.game.role.base.TanneurRole || artifact == natjom.nocturne.game.role.crepuscule.Artefact.GOURDIN_TANNEUR;
+
+                int teamCount = 0;
+                boolean teamMemberDied = false;
+
+                for (ServerPlayer p : this.serverPlayers) {
+                    Role pRole = this.board.getCurrentRole(p.getUUID());
+                    natjom.nocturne.game.role.crepuscule.Artefact pArt = this.board.getArtifact(p.getUUID());
+                    natjom.nocturne.game.role.vampire.Marque pMarq = this.board.getPlayerMarque(p.getUUID());
+
+                    boolean pIsWolf = pRole instanceof natjom.nocturne.game.role.base.LoupRole || pArt == natjom.nocturne.game.role.crepuscule.Artefact.GRIFFE_LOUP_GAROU;
+                    boolean pIsVamp = pRole instanceof natjom.nocturne.game.role.vampire.VampireRole || pRole instanceof natjom.nocturne.game.role.vampire.LeMaitreRole || pRole instanceof natjom.nocturne.game.role.vampire.LeComteRole || pMarq == natjom.nocturne.game.role.vampire.Marque.VAMPIRE;
+                    boolean pIsTanner = pRole instanceof natjom.nocturne.game.role.base.TanneurRole || pArt == natjom.nocturne.game.role.crepuscule.Artefact.GOURDIN_TANNEUR;
+
+                    boolean sameTeam = false;
+                    if (isWolf && pIsWolf) sameTeam = true;
+                    else if (isVamp && pIsVamp) sameTeam = true;
+                    else if (isTanner && pIsTanner) sameTeam = true;
+                    else if (!isWolf && !isVamp && !isTanner && !pIsWolf && !pIsVamp && !pIsTanner) sameTeam = true;
+
+                    if (sameTeam) {
+                        teamCount++;
+                        if (this.eliminatedPlayers.contains(p.getUUID()) && !p.getUUID().equals(sp.getUUID())) {
+                            teamMemberDied = true;
+                        }
+                    }
+                }
+
+                if (teamCount > 1) {
+                    won = teamMemberDied && !this.eliminatedPlayers.contains(sp.getUUID());
+                }
+            }
+
+            UUID myVoteTarget = this.votes.get(sp.getUUID());
+            if (myVoteTarget != null && this.board.getPlayerMarque(myVoteTarget) == natjom.nocturne.game.role.vampire.Marque.PESTE) {
+                won = false;
+            }
+
             String artifactInfo = artifact != null ? " §6(" + artifact.getDisplayName() + "§6)" : "";
+            String marqueInfo = (marque != null && marque != natjom.nocturne.game.role.vampire.Marque.CLARTE)
+                    ? " §r§7[" + marque.getDisplayName().getString() + "§7]"
+                    : "";
 
             if (won) {
                 sp.sendSystemMessage(Component.literal("§a§lVICTOIRE ! §r§aTu as gagné."));
-                this.addHistory(sp.getPlainTextName() + " a GAGNÉ avec le rôle " + finalRole.getDisplayName().getString() + artifactInfo);
-                sp.playSound(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, 1.0F, 1.0F);
+                this.addHistory(sp.getPlainTextName() + " a GAGNÉ avec le rôle " + finalRole.getDisplayName().getString() + artifactInfo + marqueInfo);
+                sp.playSound(net.minecraft.sounds.SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, 1.0F, 1.0F);
             } else {
                 sp.sendSystemMessage(Component.literal("§c§lDÉFAITE ! §r§cTu as perdu."));
-                this.addHistory(sp.getPlainTextName() + " a PERDU avec le rôle " + finalRole.getDisplayName().getString() + artifactInfo);
-                sp.playSound(SoundEvents.VILLAGER_NO, 1.0F, 1.0F);
+                this.addHistory(sp.getPlainTextName() + " a PERDU avec le rôle " + finalRole.getDisplayName().getString() + artifactInfo + marqueInfo);
+                sp.playSound(net.minecraft.sounds.SoundEvents.VILLAGER_NO, 1.0F, 1.0F);
             }
         }
 
@@ -363,8 +478,8 @@ public class GameSession {
     }
 
     public void start() {
-        natjom.nocturne.game.CompositionManager.initDefault();
-        List<natjom.nocturne.game.role.Role> deck = natjom.nocturne.game.CompositionManager.buildDeck();
+        CompositionManager.initDefault();
+        List<Role> deck = CompositionManager.buildDeck();
 
         int requiredCards = this.players.size() + 3;
         if (deck.size() != requiredCards) {
@@ -378,13 +493,12 @@ public class GameSession {
 
         this.board.setup(this.players, deck);
 
-
         List<String> circleNames = new ArrayList<>();
         for (UUID id : this.board.getCircleOrder()) {
             ServerPlayer p = this.serverPlayers.stream().filter(sp -> sp.getUUID().equals(id)).findFirst().orElse(null);
             if (p != null) circleNames.add(p.getPlainTextName());
         }
-        String circleString = String.join(" §8> §e", circleNames) + " §8> §e" + circleNames.get(0); // Boucle visuelle
+        String circleString = String.join(" §8> §e", circleNames) + " §8> §e" + circleNames.get(0);
 
         for (ServerPlayer sp : this.serverPlayers) {
             if (sp.getUUID().equals(this.gameMaster)) {

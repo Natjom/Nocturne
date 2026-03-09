@@ -36,6 +36,23 @@ public class DivinateurRole extends Role {
         return true;
     }
 
+    private boolean isHostile(Role role) {
+        Role actualRole = role;
+        if (role instanceof SosieRole) {
+            actualRole = (Role) ((SosieRole) role).getCopiedRole();
+        }
+
+        return actualRole instanceof LoupRole ||
+                actualRole instanceof TanneurRole ||
+                actualRole instanceof natjom.nocturne.game.role.vampire.VampireRole ||
+                actualRole instanceof natjom.nocturne.game.role.vampire.LeMaitreRole ||
+                actualRole instanceof natjom.nocturne.game.role.vampire.LeComteRole ||
+                actualRole instanceof natjom.nocturne.game.role.vampire.RenfieldRole ||
+                actualRole instanceof natjom.nocturne.game.role.vampire.AssassinRole ||
+                actualRole instanceof natjom.nocturne.game.role.vampire.ApprentieAssassinRole ||
+                actualRole instanceof natjom.nocturne.game.role.vampire.ApprentiTanneurRole;
+    }
+
     @Override
     public void onWakeUp(ServerPlayer player, GameSession session) {
         List<ItemStack> options = new ArrayList<>();
@@ -56,15 +73,12 @@ public class DivinateurRole extends Role {
 
             player.sendSystemMessage(Component.literal("§dLa carte de " + target.getPlainTextName() + " est : §l" + seenRole.getDisplayName().getString()));
 
-            boolean isWolf = seenRole instanceof LoupRole || (seenRole instanceof SosieRole && ((SosieRole) seenRole).getCopiedRole() instanceof LoupRole);
-            boolean isTanner = seenRole instanceof TanneurRole || (seenRole instanceof SosieRole && ((SosieRole) seenRole).getCopiedRole() instanceof TanneurRole);
-
-            if (!isWolf && !isTanner) {
+            if (!isHostile(seenRole)) {
                 session.getBoard().addRevealedCard(target.getUUID());
                 player.sendSystemMessage(Component.literal("§eC'est un rôle du Village ! La carte restera visible ce matin."));
                 session.addHistory("Le Divinateur (" + player.getPlainTextName() + ") a regardé et révélé publiquement la carte de " + target.getPlainTextName() + " (" + seenRole.getDisplayName().getString() + ").");
             } else {
-                player.sendSystemMessage(Component.literal("§8C'est un rôle hostile (Loup ou Tanneur). La carte restera cachée."));
+                player.sendSystemMessage(Component.literal("§8C'est un rôle hostile. La carte restera cachée."));
                 session.addHistory("Le Divinateur (" + player.getPlainTextName() + ") a regardé la carte de " + target.getPlainTextName() + " (" + seenRole.getDisplayName().getString() + ") mais elle reste secrète.");
             }
             session.getBoard().addPlayerAction(player.getUUID());

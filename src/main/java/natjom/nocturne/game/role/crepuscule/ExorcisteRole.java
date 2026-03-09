@@ -42,9 +42,20 @@ public class ExorcisteRole extends Role {
     }
 
     private boolean isHostile(Role role) {
-        boolean isWolf = role instanceof LoupRole || (role instanceof SosieRole && ((SosieRole) role).getCopiedRole() instanceof LoupRole);
-        boolean isTanner = role instanceof TanneurRole || (role instanceof SosieRole && ((SosieRole) role).getCopiedRole() instanceof TanneurRole);
-        return isWolf || isTanner;
+        Role actualRole = role;
+        if (role instanceof SosieRole) {
+            actualRole = (Role) ((SosieRole) role).getCopiedRole();
+        }
+
+        return actualRole instanceof LoupRole ||
+                actualRole instanceof TanneurRole ||
+                actualRole instanceof natjom.nocturne.game.role.vampire.VampireRole ||
+                actualRole instanceof natjom.nocturne.game.role.vampire.LeMaitreRole ||
+                actualRole instanceof natjom.nocturne.game.role.vampire.LeComteRole ||
+                actualRole instanceof natjom.nocturne.game.role.vampire.RenfieldRole ||
+                actualRole instanceof natjom.nocturne.game.role.vampire.AssassinRole ||
+                actualRole instanceof natjom.nocturne.game.role.vampire.ApprentieAssassinRole ||
+                actualRole instanceof natjom.nocturne.game.role.vampire.ApprentiTanneurRole;
     }
 
     private void openFirstPick(ServerPlayer player, GameSession session) {
