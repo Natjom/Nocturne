@@ -37,14 +37,8 @@ public class LaChoseRole extends Role implements VampireExtensionRole {
 
     @Override
     public void onWakeUp(ServerPlayer player, GameSession session) {
-        List<UUID> circle = session.getBoard().getCircleOrder();
-        int myIndex = circle.indexOf(player.getUUID());
-
-        int leftIndex = (myIndex + 1) % circle.size();
-        int rightIndex = (myIndex - 1 + circle.size()) % circle.size();
-
-        UUID leftId = circle.get(leftIndex);
-        UUID rightId = circle.get(rightIndex);
+        UUID leftId = session.getBoard().getLeftNeighbor(player.getUUID());
+        UUID rightId = session.getBoard().getRightNeighbor(player.getUUID());
 
         ServerPlayer leftPlayer = session.getServerPlayers().stream().filter(p -> p.getUUID().equals(leftId)).findFirst().orElse(null);
         ServerPlayer rightPlayer = session.getServerPlayers().stream().filter(p -> p.getUUID().equals(rightId)).findFirst().orElse(null);
@@ -57,9 +51,10 @@ public class LaChoseRole extends Role implements VampireExtensionRole {
 
         MenuHelper.openChoiceMenu(player, "§8Toucher un voisin", options, index -> {
             ServerPlayer targetPlayer = (index == 0) ? leftPlayer : rightPlayer;
+            String shoulder = (index == 0) ? "droite" : "gauche";
 
             if (targetPlayer != null) {
-                targetPlayer.sendSystemMessage(Component.literal("§8[Nuit] *Tu sens une légère tape sur ton épaule...*"));
+                targetPlayer.sendSystemMessage(Component.literal("§8[Nuit] *Tu sens une légère tape sur ton épaule " + shoulder + "...*"));
                 targetPlayer.playSound(SoundEvents.PLAYER_ATTACK_WEAK, 1.0F, 1.0F);
 
                 player.sendSystemMessage(Component.literal("§8Tu as touché " + targetPlayer.getPlainTextName() + "."));

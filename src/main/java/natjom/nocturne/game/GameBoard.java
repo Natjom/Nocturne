@@ -127,4 +127,18 @@ public class GameBoard {
         this.playerMarques.put(player1, m2);
         this.playerMarques.put(player2, m1);
     }
+
+    public UUID getLeftNeighbor(UUID playerId) {
+        int index = this.circleOrder.indexOf(playerId);
+        if (index == -1) return null;
+        int leftIndex = (index - 1 + this.circleOrder.size()) % this.circleOrder.size();
+        return this.circleOrder.get(leftIndex);
+    }
+
+    public UUID getRightNeighbor(UUID playerId) {
+        int index = this.circleOrder.indexOf(playerId);
+        if (index == -1) return null;
+        int rightIndex = (index + 1) % this.circleOrder.size();
+        return this.circleOrder.get(rightIndex);
+    }
 }
