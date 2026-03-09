@@ -40,10 +40,8 @@ public class ConservateurRole extends Role {
         List<ServerPlayer> validTargets = new ArrayList<>();
 
         for (ServerPlayer target : session.getServerPlayers()) {
-            if (!target.getUUID().equals(player.getUUID()) && !session.getBoard().isShielded(target.getUUID())) {
                 options.add(MenuIcons.makePlayerHead(target, "§6"));
                 validTargets.add(target);
-            }
         }
 
         player.sendSystemMessage(Component.literal("§c[Nuit] Choisis un joueur à qui donner un Artefact mystère."));
