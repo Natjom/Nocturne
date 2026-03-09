@@ -18,6 +18,7 @@ public class NightCycleManager {
     private int currentMaxTime = 1;
     private final ServerBossEvent nightBossBar;
     private boolean hasCheckedMarques = false;
+    private boolean hasCheckedLovers = false;
 
     public NightCycleManager(GameSession session) {
         this.session = session;
@@ -103,6 +104,32 @@ public class NightCycleManager {
                 }
             }
             return;
+        }
+
+        if (hasVampireDLC && this.hasCheckedMarques && !this.hasCheckedLovers && currentRole.getNightOrder() >= 12) {
+            this.hasCheckedLovers = true;
+            this.currentPhaseIndex--;
+
+            List<ServerPlayer> lovers = new ArrayList<>();
+            for (ServerPlayer sp : this.session.getServerPlayers()) {
+                if (this.session.getBoard().getPlayerMarque(sp.getUUID()) == natjom.nocturne.game.role.vampire.Marque.AMOUR) {
+                    lovers.add(sp);
+                }
+            }
+
+            if (lovers.size() == 2) {
+                this.currentMaxTime = 100;
+                this.timer = this.currentMaxTime;
+                this.nightBossBar.setName(Component.literal("§d§lPhase des Amoureux"));
+
+                ServerPlayer lover1 = lovers.get(0);
+                ServerPlayer lover2 = lovers.get(1);
+
+                lover1.sendSystemMessage(Component.literal("§d[Amour] Ton/Ta partenaire est : " + lover2.getPlainTextName()));
+                lover2.sendSystemMessage(Component.literal("§d[Amour] Ton/Ta partenaire est : " + lover1.getPlainTextName()));
+
+                return;
+            }
         }
 
         this.currentMaxTime = currentRole.getActionDuration();
